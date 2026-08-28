@@ -1,0 +1,52 @@
+DANA JOURNALISM — CMS / STUDIO QA
+================================
+
+Reader UI
+- Existing reader interface preserved.
+- No link/reference to studio.html in index.html.
+- articles.js preserved as bundled archive (33 slugs, unique).
+- Published CMS articles are merged on page load and override matching slugs.
+- New articles use section fallback cover when no image is uploaded.
+
+Private Studio
+- studio.html has noindex,nofollow,noarchive.
+- Owner email: Danahfahad.mb@gmail.com.
+- Passwordless Supabase authentication.
+- Owner claim is enforced in database against authenticated email.
+- Draft / publish / edit / delete supported for CMS articles.
+- Optional image upload to article-images storage bucket.
+- Publish date recorded using Saudi local date.
+
+Analytics
+- page_view
+- article_view
+- scroll_50
+- scroll_90
+- article_leave + reading seconds
+- session_start
+- search
+- share
+- save
+- dashboard ranges: 7 / 30 / 90 days
+- page views, unique visitors, sessions, article reads, completion rate,
+  average reading time, pages/session, approximate bounce rate, shares,
+  saves, searches, devices, referrers, top content, daily chart.
+
+Security
+- RLS enabled on admin_users, cms_articles, site_events.
+- Public can read only published CMS articles.
+- Only authenticated owner can write/update/delete content and upload images.
+- Analytics read access restricted to admin.
+- Supabase security advisor: 0 lints after hardening.
+
+Static QA
+- app.js syntax: OK
+- backend.js syntax: OK
+- studio.js syntax: OK
+- service-worker.js syntax: OK
+- Local HTTP smoke test: index.html / studio.html / backend.js OK
+- studio.html not linked in reader UI: OK
+
+Deployment note
+- Once the final GitHub Pages URL is known, add the exact studio.html URL to
+  Supabase Auth > URL Configuration > Redirect URLs for Magic Link return.

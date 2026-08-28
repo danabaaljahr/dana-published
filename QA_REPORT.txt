@@ -1,0 +1,44 @@
+DANA ALJAHR — BUILD QA
+======================
+
+Dataset
+- 33 total stories
+- 7 news
+- 11 reports
+- 14 essays
+- 1 training experience
+- 6 stories with structured statistics
+- 11 benefits in “بين الدراسة والممارسة”
+- 33 unique slugs
+- Author normalized to: دانه بالجهر
+
+Build integrity
+- articles.js retained byte-for-byte from the source build
+- JavaScript syntax checked with Node
+- CSS parsed without syntax errors
+- All 33 generated cover paths exist
+- All static HTML asset references exist
+- No build step required
+- GitHub Pages compatible (.nojekyll included)
+- PWA service worker caches the core UI and all 33 covers
+
+UX features
+- Arabic / English interface toggle
+- Light / Dark monochrome themes
+- Sticky quick-choice content ribbon
+- Prefix-only title search + keyboard navigation
+- Work format switcher
+- Horizontal selected-work rail + drag interaction
+- Saved stories using localStorage
+- Recently viewed / Continue Reading
+- Random story shortcut
+- Grid / list archive modes
+- Reading font-size / width controls
+- Reading focus mode
+- Reading progress
+- Share / copy-link fallback
+- Related, previous and next stories
+- Reduced-motion accessibility support
+- Keyboard focus states and skip link
+- Responsive desktop / tablet / mobile layouts
+- Custom 404 page

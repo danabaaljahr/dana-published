@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<rect width="1600" height="900" fill="#0b0d0e"/>
+<circle cx="1380" cy="150" r="260" fill="none" stroke="#303437" stroke-width="1"/><circle cx="1380" cy="150" r="190" fill="none" stroke="#25292b" stroke-width="1"/>
+<path d="M0 760 C300 650 480 820 810 720 C1110 630 1320 660 1600 570 L1600 900 L0 900Z" fill="#15191b"/>
+<text x="110" y="135" fill="#7e878c" font-size="25" font-family="Arial" letter-spacing="7">DANA ALJAHR · NEWS</text>
+<text x="1480" y="150" fill="#f6f1e8" font-size="42" text-anchor="end" font-family="Arial">01</text>
+<text x="1480" y="500" fill="#f6f1e8" font-size="112" font-weight="700" text-anchor="end" direction="rtl" unicode-bidi="bidi-override" font-family="Arial">خبر</text>
+<line x1="110" y1="680" x2="1490" y2="680" stroke="#4a4f51"/>
+<text x="110" y="740" fill="#a8adaf" font-size="24" font-family="Arial">EDITORIAL PORTFOLIO · 2026</text>
+</svg>

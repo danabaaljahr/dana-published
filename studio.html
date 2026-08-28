@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <meta name="theme-color" content="#0b0c0d" />
+  <title>Dana Studio — لوحة التحرير</title>
+  <link rel="icon" href="assets/brand/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="studio.css" />
+  <script defer src="articles.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="studio.js"></script>
+</head>
+<body>
+  <div class="studio-login" id="studioLogin">
+    <div class="login-art"><span>PRIVATE EDITORIAL SYSTEM · 2026</span><strong>DANA<br>STUDIO</strong><p>مساحة التحرير والتحليلات الخاصة بدانه بالجهر.</p></div>
+    <div class="login-card">
+      <img src="assets/brand/dana-mark.png" alt="" width="62" height="62" />
+      <span class="eyebrow">OWNER ACCESS ONLY</span>
+      <h1>دخول لوحة الإدارة</h1>
+      <p>سيُرسل رابط دخول آمن إلى البريد المعتمد فقط. لا توجد كلمة مرور محفوظة داخل الموقع.</p>
+      <label>البريد المعتمد<input id="loginEmail" value="Danahfahad.mb@gmail.com" readonly /></label>
+      <button id="sendMagicLink" class="primary-btn" type="button"><span>إرسال رابط الدخول</span><b>↗</b></button>
+      <div class="login-status" id="loginStatus" aria-live="polite"></div>
+      <small>هذه الصفحة غير مرتبطة بواجهة القراء، والوصول إلى بياناتها محمي أيضًا من قاعدة البيانات.</small>
+    </div>
+  </div>
+
+  <div class="studio-app" id="studioApp" hidden>
+    <aside class="studio-sidebar">
+      <div class="studio-brand"><img src="assets/brand/dana-mark.png" alt=""><div><strong>DANA STUDIO</strong><span>Editorial Control Room</span></div></div>
+      <nav id="studioNav">
+        <button class="active" data-view="dashboard"><i>01</i><span>نظرة عامة</span></button>
+        <button data-view="compose"><i>02</i><span>مادة جديدة</span></button>
+        <button data-view="content"><i>03</i><span>المواد</span></button>
+        <button data-view="analytics"><i>04</i><span>التحليلات</span></button>
+      </nav>
+      <div class="sidebar-bottom"><a href="./" target="_blank" rel="noopener">فتح واجهة القراء ↗</a><button id="signOut" type="button">تسجيل الخروج</button></div>
+    </aside>
+
+    <div class="studio-main">
+      <header class="studio-topbar"><div><button class="mobile-nav" id="mobileNav" type="button">☰</button><span id="currentSection">نظرة عامة</span><small id="todayLabel"></small></div><div class="top-actions"><span class="live-dot"><i></i> LIVE DATA</span><button id="refreshData" type="button">تحديث ↻</button></div></header>
+      <main id="studioContent"></main>
+    </div>
+  </div>
+
+  <div class="studio-toast" id="studioToast" hidden></div>
+</body>
+</html>

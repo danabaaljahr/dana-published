@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f4f3ef" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="الموقع الصحفي لدانه بالجهر — أخبار وتقارير ومقالات وتجارب تدريبية." />
+  <meta name="author" content="دانه بالجهر" />
+  <meta property="og:locale" content="ar_SA" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="دانه بالجهر | أعمال صحفية" />
+  <meta property="og:description" content="أخبار وتقارير ومقالات وتجارب تدريبية بقلم دانه بالجهر." />
+  <meta property="og:image" content="assets/brand/icon-512.png" />
+  <title>دانه بالجهر | أعمال صحفية</title>
+  <link rel="icon" href="assets/brand/favicon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/brand/icon-192.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Person",
+    "name":"دانه بالجهر",
+    "description":"كاتبة تعرض أعمالًا صحفية تشمل الأخبار والتقارير والمقالات والتجارب التدريبية.",
+    "alumniOf":{"@type":"CollegeOrUniversity","name":"جامعة جدة"}
+  }
+  </script>
+  <script defer src="articles.js"></script>
+  <script defer src="backend.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="skip">تجاوز إلى المحتوى</a>
+  <div class="page-progress" id="pageProgress" aria-hidden="true"><span></span></div>
+  <div class="cursor-orb" id="cursorOrb" aria-hidden="true"><span>OPEN</span></div>
+
+  <header class="site-header" id="siteHeader">
+    <div class="shell header-row">
+      <a class="brand" href="./" data-home-link aria-label="العودة إلى الصفحة الرئيسية">
+        <span class="brand-mark"><img src="assets/brand/dana-mark.png" alt="" width="46" height="46" /></span>
+        <span class="brand-copy"><strong data-i18n="name">دانه بالجهر</strong><small data-i18n="portfolio">أعمال صحفية</small></span>
+      </a>
+
+      <nav class="primary-nav" aria-label="التنقل الرئيسي">
+        <a href="#work" data-home-anchor="work" data-i18n="work">الأعمال</a>
+        <a href="#about" data-home-anchor="about" data-i18n="about">من أنا</a>
+        <a href="#archive" data-home-anchor="archive" data-i18n="archive">الأرشيف</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="utility-chip" id="langToggle" type="button" aria-label="تبديل اللغة"><span class="lang-current">AR</span><span class="slash">/</span><span class="lang-other">EN</span></button>
+        <button class="icon-control" id="themeToggle" type="button" aria-label="تبديل المظهر">
+          <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+          <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.2A8 8 0 0 1 8.8 4a8.2 8.2 0 1 0 11.2 11.2Z"/></svg>
+        </button>
+        <button class="search-control" id="searchToggle" type="button" aria-label="فتح البحث" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+          <span data-i18n="search">بحث</span><kbd>/</kbd>
+        </button>
+        <button class="icon-control menu-control" id="menuToggle" type="button" aria-label="فتح القائمة" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="content-ribbon" id="contentRibbon" aria-label="اختيار نوع المحتوى">
+    <div class="shell ribbon-inner">
+      <span class="ribbon-label"><i></i><span data-i18n="choose">اختاري ما تريدين رؤيته</span></span>
+      <div class="ribbon-track" id="ribbonTrack"></div>
+      <div class="ribbon-tools">
+        <button id="savedShortcut" type="button" class="ribbon-mini"><span data-i18n="saved">المحفوظة</span><b id="savedCount">0</b></button>
+        <button id="randomStory" type="button" class="ribbon-mini random"><span data-i18n="surprise">فاجئني</span><span>↗</span></button>
+      </div>
+    </div>
+  </div>
+
+  <section class="search-overlay" id="searchPanel" aria-hidden="true" hidden>
+    <div class="search-backdrop" data-search-close></div>
+    <div class="search-dialog" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+      <div class="search-head">
+        <div><span class="micro-label">SEARCH / 33 STORIES</span><h2 id="searchTitle" data-i18n="searchArchive">ابحثي في الأرشيف</h2></div>
+        <button class="close-control" type="button" data-search-close aria-label="إغلاق"><span>ESC</span><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></svg></button>
+      </div>
+      <label class="search-field" for="globalSearch">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+        <input id="globalSearch" type="search" autocomplete="off" spellcheck="false" placeholder="ابدئي بحرف أو كلمة من العنوان…" />
+        <button class="clear-search" type="button" id="clearSearch" hidden data-i18n="clear">مسح</button>
+      </label>
+      <div class="search-meta"><span id="searchStatus"></span><span data-i18n="titleMatch">مطابقة بداية كلمات العنوان فقط</span></div>
+      <div id="quickResults" class="quick-results" aria-live="polite"></div>
+      <div class="search-shortcuts"><span><kbd>↑</kbd><kbd>↓</kbd> <b data-i18n="navigate">تنقل</b></span><span><kbd>Enter</kbd> <b data-i18n="open">فتح</b></span><span><kbd>Esc</kbd> <b data-i18n="close">إغلاق</b></span></div>
+    </div>
+  </section>
+
+  <aside class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
+    <div class="drawer-head">
+      <a class="drawer-brand" href="./" data-home-link><img src="assets/brand/dana-mark.png" alt="" width="46" height="46" /><span><strong data-i18n="name">دانه بالجهر</strong><small data-i18n="portfolio">أعمال صحفية</small></span></a>
+      <button class="icon-control" id="drawerClose" type="button" aria-label="إغلاق">×</button>
+    </div>
+    <div class="drawer-language"><button type="button" data-drawer-lang="ar">العربية</button><button type="button" data-drawer-lang="en">English</button></div>
+    <div class="drawer-links">
+      <a href="#work" data-drawer-link data-home-anchor="work"><span>01</span><strong data-i18n="work">الأعمال</strong></a>
+      <a href="#about" data-drawer-link data-home-anchor="about"><span>02</span><strong data-i18n="about">من أنا</strong></a>
+      <a href="#insights" data-drawer-link data-home-anchor="insights"><span>03</span><strong data-i18n="numbers">الأرقام</strong></a>
+      <a href="#training" data-drawer-link data-home-anchor="training"><span>04</span><strong data-i18n="experience">التجربة</strong></a>
+      <a href="#archive" data-drawer-link data-home-anchor="archive"><span>05</span><strong data-i18n="archive">الأرشيف</strong></a>
+    </div>
+    <button class="drawer-search" id="drawerSearch" type="button"><span data-i18n="searchArchive">ابحثي في الأرشيف</span><span>↗</span></button>
+    <div class="drawer-footer"><span>33 STORIES</span><span>© 2026</span></div>
+  </aside>
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+
+  <main id="main" tabindex="-1"></main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div class="footer-statement"><span class="micro-label">DANA ALJAHR · EDITORIAL PORTFOLIO</span><h2 data-i18n="footerBig">الكلمة تبدأ من سؤال.</h2><p data-i18n="footerText">أرشيف صحفي يجمع الخبر والتقرير والمقال والتجربة الميدانية في مساحة واحدة.</p></div>
+      <div class="footer-nav"><div><span data-i18n="explore">استكشف</span><a href="#work" data-home-anchor="work" data-i18n="work">الأعمال</a><a href="#about" data-home-anchor="about" data-i18n="about">من أنا</a><a href="#archive" data-home-anchor="archive" data-i18n="archive">الأرشيف</a></div><div><span data-i18n="settings">الإعدادات</span><button type="button" id="footerLang">AR / EN</button><button type="button" id="footerTheme" data-i18n="appearance">المظهر</button><button type="button" id="footerTop" data-i18n="toTop">إلى الأعلى ↑</button></div></div>
+    </div>
+    <div class="shell footer-bottom"><span id="footerCount">33 مادة صحفية</span><span>© 2026 <b data-i18n="name">دانه بالجهر</b></span><span class="availability"><i></i><span data-i18n="staticSite">Static · GitHub Pages Ready</span></span></div>
+  </footer>
+
+  <div class="reading-dock" id="readingDock" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <noscript><div class="noscript">هذا الموقع يحتاج إلى JavaScript لعرض المواد والبحث فيها.</div></noscript>
+</body>
+</html>
