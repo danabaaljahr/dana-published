@@ -1,44 +1,28 @@
-DANA ALJAHR — BUILD QA
-======================
+DANA BALJHER — READER + STUDIO QA / V9
 
-Dataset
-- 33 total stories
-- 7 news
-- 11 reports
-- 14 essays
-- 1 training experience
-- 6 stories with structured statistics
-- 11 benefits in “بين الدراسة والممارسة”
-- 33 unique slugs
-- Author normalized to: دانه بالجهر
+Reader
+- 33 bundled Arabic originals preserved (text unchanged; two broken legacy image paths were repaired to existing section covers).
+- 33 full English translations present; body/stats/benefits structures match the Arabic source.
+- 7 news / 11 reports / 14 essays / 1 field experience.
+- Full archive removed from homepage and moved to archive.html.
+- Separate news / reports / essays / experience / report-data pages.
+- Homepage avoids repeating the same story as a full card in multiple sections; the data preview excludes selected-story slugs.
+- No blocking View Transition, pointer-tilt, magnetic or cursor-lock logic.
+- Low-vision A− / 100% / A+ controls scale the document root and persist.
+- English mode switches layout direction and uses English story text, stats and benefits.
+- New CMS stories without an uploaded image use the correct section fallback cover.
 
-Build integrity
-- articles.js retained byte-for-byte from the source build
-- JavaScript syntax checked with Node
-- CSS parsed without syntax errors
-- All 33 generated cover paths exist
-- All static HTML asset references exist
-- No build step required
-- GitHub Pages compatible (.nojekyll included)
-- PWA service worker caches the core UI and all 33 covers
+Studio
+- Clickable + drag/drop image picker with preview, replace and remove.
+- Existing 33 bundled stories bootstrap into CMS on first authenticated Studio load if missing, then dashboard/content counts reflect them as published.
+- Arabic + optional English publishing fields.
+- Draft / publish / edit / delete remain connected to Supabase.
+- Studio is not linked from the reader interface and is noindex/nofollow.
 
-UX features
-- Arabic / English interface toggle
-- Light / Dark monochrome themes
-- Sticky quick-choice content ribbon
-- Prefix-only title search + keyboard navigation
-- Work format switcher
-- Horizontal selected-work rail + drag interaction
-- Saved stories using localStorage
-- Recently viewed / Continue Reading
-- Random story shortcut
-- Grid / list archive modes
-- Reading font-size / width controls
-- Reading focus mode
-- Reading progress
-- Share / copy-link fallback
-- Related, previous and next stories
-- Reduced-motion accessibility support
-- Keyboard focus states and skip link
-- Responsive desktop / tablet / mobile layouts
-- Custom 404 page
+Static validation
+- JavaScript syntax checks pass: articles.js / translations-en.js / app.js / backend.js / studio.js / service-worker.js.
+- CSS braces balanced.
+- Internal HTML asset/page references checked: 0 missing.
+- Service-worker core references checked: 0 missing.
+- 33 article image paths checked: 0 missing.
+- English translations checked for Arabic-script leakage: 0.

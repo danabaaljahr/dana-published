@@ -1,52 +1,28 @@
 DANA JOURNALISM — CMS / STUDIO QA
 ================================
 
-Reader UI
-- Existing reader interface preserved.
-- No link/reference to studio.html in index.html.
-- articles.js preserved as bundled archive (33 slugs, unique).
-- Published CMS articles are merged on page load and override matching slugs.
-- New articles use section fallback cover when no image is uploaded.
+Reader / CMS integration
+- Bundled archive contains 33 unique slugs.
+- Published CMS rows merge into the reader and override matching bundled slugs.
+- The Studio automatically imports missing bundled stories into cms_articles after authenticated owner entry.
+- Existing original publication dates are preserved during bootstrap.
+- New published stories receive the Saudi local publication date.
+- New stories with no uploaded image use a section fallback cover.
 
 Private Studio
-- studio.html has noindex,nofollow,noarchive.
-- Owner email: Danahfahad.mb@gmail.com.
+- studio.html includes noindex,nofollow,noarchive and has no reader-side navigation link.
+- Owner email is restricted in database/login flow to the configured owner account.
 - Passwordless Supabase authentication.
-- Owner claim is enforced in database against authenticated email.
-- Draft / publish / edit / delete supported for CMS articles.
-- Optional image upload to article-images storage bucket.
-- Publish date recorded using Saudi local date.
+- Image uploads use the public article-images bucket, with write policies restricted to authenticated admin.
+- Draft / publish / edit / delete supported.
 
 Analytics
-- page_view
-- article_view
-- scroll_50
-- scroll_90
-- article_leave + reading seconds
-- session_start
-- search
-- share
-- save
-- dashboard ranges: 7 / 30 / 90 days
-- page views, unique visitors, sessions, article reads, completion rate,
-  average reading time, pages/session, approximate bounce rate, shares,
-  saves, searches, devices, referrers, top content, daily chart.
+- page_view, article_view, scroll_50, scroll_90, article_leave, session_start, search, share, save.
+- Dashboard ranges: 7 / 30 / 90 days.
+- Page views, visitors, sessions, article reads, completion, average read time, pages/session, approximate bounce rate, shares, saves, searches, devices, referrers, top content, daily chart.
 
-Security
-- RLS enabled on admin_users, cms_articles, site_events.
-- Public can read only published CMS articles.
-- Only authenticated owner can write/update/delete content and upload images.
-- Analytics read access restricted to admin.
-- Supabase security advisor: 0 lints after hardening.
-
-Static QA
-- app.js syntax: OK
-- backend.js syntax: OK
-- studio.js syntax: OK
-- service-worker.js syntax: OK
-- Local HTTP smoke test: index.html / studio.html / backend.js OK
-- studio.html not linked in reader UI: OK
-
-Deployment note
-- Once the final GitHub Pages URL is known, add the exact studio.html URL to
-  Supabase Auth > URL Configuration > Redirect URLs for Magic Link return.
+Security notes
+- RLS is enabled for admin_users, cms_articles and site_events.
+- Anonymous/public readers can read only published CMS content.
+- CMS writes and analytics reads require authenticated admin.
+- Supabase currently reports the optional leaked-password-protection warning; this Studio uses passwordless email links rather than account passwords.
