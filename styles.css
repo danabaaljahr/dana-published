@@ -110,3 +110,28 @@ html[data-theme="dark"] .hero-v11{background:radial-gradient(ellipse at 93% 42%,
 html[data-theme="dark"] .hero-v11-card{background:linear-gradient(145deg,#ece6dc,#dcd4c8);color:#0d1317;border-color:rgba(0,0,0,.08)}html[data-theme="dark"] .hero-v11-kicker{color:#765b43}html[data-theme="dark"] .hero-v11-kicker i{background:#8b6e54}html[data-theme="dark"] .hero-v11-card p{color:#151b1f}html[data-theme="dark"] .hero-v11-btn-primary{background:#11171b;color:#f4efe7;border-color:#11171b}html[data-theme="dark"] .hero-v11-btn-ghost{color:#11171b;border-color:rgba(17,23,27,.45)}
 @media(max-width:1100px){.hero-v11-stage{grid-template-columns:minmax(20rem,.92fr) minmax(23rem,1.08fr);gap:3rem}.hero-v11-card{min-height:23rem;padding:2.2rem}.hero-v11-card p{font-size:1.08rem}.hero-v11-english{letter-spacing:.2em}}
 @media(max-width:760px){.hero-v11{min-height:auto;background:radial-gradient(ellipse at 100% 18%,transparent 0 22%,color-mix(in srgb,#9b7d5f 25%,transparent) 22.1% 22.35%,transparent 22.5%),var(--bg)}.hero-v11-inner{min-height:auto;padding:2rem 0 3rem}.hero-v11-stage{grid-template-columns:1fr;grid-template-areas:"identity" "card";gap:1.5rem}.hero-v11-identity{padding:.6rem .5rem 1rem}.hero-v11-arabic strong{font-size:4.7rem}.hero-v11-arabic span{font-size:4.2rem}.hero-v11-divider{margin:1rem auto .8rem;width:80%}.hero-v11-english{font-size:1.8rem;letter-spacing:.17em;white-space:normal}.hero-v11-sub{font-size:.9rem}.hero-v11-card{min-height:auto;border-radius:1.6rem;padding:1.55rem;gap:1.6rem}.hero-v11-kicker{grid-template-columns:2rem auto 2rem;font-size:.58rem;gap:.7rem;letter-spacing:.12em}.hero-v11-card p{font-size:.95rem;line-height:1.85}.hero-v11-actions{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}.hero-v11-btn{min-height:3.5rem;padding:0 .9rem;font-size:.78rem}.hero-v11-btn .arrow{width:1.8rem;height:1.8rem}}
+
+/* v12 — mobile drawer must scroll independently on touch devices */
+@media(max-width:760px){
+  body.drawer-open{overflow:hidden}
+  .mobile-drawer{
+    height:100vh;
+    height:100dvh;
+    max-height:100dvh;
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
+    padding-bottom:calc(2rem + env(safe-area-inset-bottom));
+    scrollbar-width:thin;
+  }
+  .drawer-head{
+    position:sticky;
+    top:-1rem;
+    z-index:4;
+    background:var(--paper);
+    padding-top:1rem;
+  }
+  .drawer-links,.drawer-language,.drawer-search{position:relative;z-index:1}
+}

@@ -1,4 +1,4 @@
-const CACHE='dana-editorial-v11';
+const CACHE='dana-editorial-v12-mobile-drawer';
 const CORE=['./','./index.html','./archive.html','./news.html','./reports.html','./essays.html','./experience.html','./data.html','./styles.css','./app.js','./backend.js','./articles.js','./translations-en.js','./manifest.webmanifest','./assets/brand/dana-mark.png','./assets/brand/favicon.png','./assets/brand/icon-192.png','./assets/brand/icon-512.png','./assets/covers/default-news.svg','./assets/covers/default-report.svg','./assets/covers/default-article.svg','./assets/covers/default-training.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
