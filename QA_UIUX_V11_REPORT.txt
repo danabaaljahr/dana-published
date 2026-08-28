@@ -1,0 +1,25 @@
+DANA PUBLISHED V11 — HERO QA
+
+PASS — new hero markup
+PASS — brand spelling
+PASS — arabic identity
+PASS — v11 cache bust
+PASS — v11 service worker
+PASS — hero responsive css
+PASS — hero dark mode css
+PASS — 33 articles
+PASS — unique slugs
+PASS — index.html
+PASS — archive.html
+PASS — news.html
+PASS — reports.html
+PASS — essays.html
+PASS — experience.html
+PASS — data.html
+PASS — studio.html
+PASS — app.js
+PASS — styles.css
+PASS — articles.js
+PASS — translations-en.js
+
+Checks: 21/21 passed
