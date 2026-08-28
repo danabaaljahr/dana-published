@@ -1,0 +1,26 @@
+DANA PUBLISHED — V10 UI/UX QA
+Date: 2026-08-28
+
+Implemented in this revision:
+- Rebalanced homepage hero: name is primary; supporting copy moved into a separate editorial card.
+- Removed the low-value "Path / المسار" panel from About.
+- Added compact timeless About facts: Digital Media / University of Jeddah / Jeddah.
+- Changed public navigation label from Work / الأعمال to Home / الصفحة الرئيسية.
+- Added explicit Home return control on Archive, News, Reports, Essays, Experience and Report Data pages.
+- Added both Back and Home navigation inside story pages.
+- Reduced article headline scale and made major typography rem-based so A− / A+ affects it reliably.
+- Removed duplicate title-cover inside story pages: bundled/generated SVG covers are not rendered under the title.
+- Real uploaded JPG/PNG/WebP/GIF images still render in story pages.
+- Bumped static asset and service-worker cache version to v10.
+
+QA checks:
+- JavaScript syntax: app.js, backend.js, studio.js — PASS
+- CSS parse errors — 0
+- 33 bundled stories — PASS
+- 33 unique slugs — PASS
+- 33 English translations — PASS
+- Missing bundled covers — 0
+- Required internal pages — PASS
+- Static src/href file references — PASS
+- Home navigation present across public pages — PASS
+- Stale v9 HTML asset references — 0
