@@ -19,19 +19,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260828-reader2" />
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
     "@type":"Person",
     "name":"دانه بالجهر",
     "description":"كاتبة تعرض أعمالًا صحفية تشمل الأخبار والتقارير والمقالات والتجارب التدريبية.",
-    "alumniOf":{"@type":"CollegeOrUniversity","name":"جامعة جدة"}
+    "affiliation":{"@type":"CollegeOrUniversity","name":"جامعة جدة"},
+    "knowsAbout":["الإعلام الرقمي","الصحافة","الكتابة الصحفية"]
   }
   </script>
   <script defer src="articles.js"></script>
-  <script defer src="backend.js"></script>
-  <script defer src="app.js"></script>
+  <script defer src="backend.js?v=20260828-reader2"></script>
+  <script defer src="app.js?v=20260828-reader2"></script>
 </head>
 <body>
   <a class="skip-link" href="#main" data-i18n="skip">تجاوز إلى المحتوى</a>
@@ -109,7 +110,7 @@
       <a href="#archive" data-drawer-link data-home-anchor="archive"><span>05</span><strong data-i18n="archive">الأرشيف</strong></a>
     </div>
     <button class="drawer-search" id="drawerSearch" type="button"><span data-i18n="searchArchive">ابحثي في الأرشيف</span><span>↗</span></button>
-    <div class="drawer-footer"><span>33 STORIES</span><span>© 2026</span></div>
+    <div class="drawer-footer"><span>33 STORIES</span><span>© <b data-current-year>2026</b></span></div>
   </aside>
   <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
 
@@ -120,7 +121,7 @@
       <div class="footer-statement"><span class="micro-label">DANA ALJAHR · EDITORIAL PORTFOLIO</span><h2 data-i18n="footerBig">الكلمة تبدأ من سؤال.</h2><p data-i18n="footerText">أرشيف صحفي يجمع الخبر والتقرير والمقال والتجربة الميدانية في مساحة واحدة.</p></div>
       <div class="footer-nav"><div><span data-i18n="explore">استكشف</span><a href="#work" data-home-anchor="work" data-i18n="work">الأعمال</a><a href="#about" data-home-anchor="about" data-i18n="about">من أنا</a><a href="#archive" data-home-anchor="archive" data-i18n="archive">الأرشيف</a></div><div><span data-i18n="settings">الإعدادات</span><button type="button" id="footerLang">AR / EN</button><button type="button" id="footerTheme" data-i18n="appearance">المظهر</button><button type="button" id="footerTop" data-i18n="toTop">إلى الأعلى ↑</button></div></div>
     </div>
-    <div class="shell footer-bottom"><span id="footerCount">33 مادة صحفية</span><span>© 2026 <b data-i18n="name">دانه بالجهر</b></span><span class="availability"><i></i><span data-i18n="staticSite">Static · GitHub Pages Ready</span></span></div>
+    <div class="shell footer-bottom"><span id="footerCount">33 مادة صحفية</span><span>© <span data-current-year>2026</span> <b data-i18n="name">دانه بالجهر</b></span><span class="availability"><i></i><span data-i18n="staticSite">Static · GitHub Pages Ready</span></span></div>
   </footer>
 
   <div class="reading-dock" id="readingDock" hidden></div>

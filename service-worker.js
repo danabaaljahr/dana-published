@@ -1,4 +1,4 @@
-const CACHE = "dana-editorial-v6-cms";
+const CACHE = "dana-editorial-v7-reader-fixes";
 const CORE = [
   "./",
   "./index.html",
@@ -55,8 +55,17 @@ self.addEventListener("activate", event => event.waitUntil(caches.keys().then(ke
 self.addEventListener("fetch", event => {
   const u = new URL(event.request.url);
   if(event.request.method !== "GET" || u.origin !== location.origin || u.pathname.endsWith("/studio.html") || u.pathname.endsWith("/studio.js") || u.pathname.endsWith("/studio.css")) return;
+
+  if(event.request.mode === "navigate"){
+    event.respondWith(fetch(event.request).then(response => {
+      if(response && response.ok){ const clone=response.clone(); caches.open(CACHE).then(cache=>cache.put("./index.html",clone)); }
+      return response;
+    }).catch(()=>caches.match("./index.html")));
+    return;
+  }
+
   event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
     if(response && response.ok){ const clone=response.clone(); caches.open(CACHE).then(cache=>cache.put(event.request,clone)); }
     return response;
-  }).catch(()=> event.request.mode === "navigate" ? caches.match("./index.html") : Promise.reject())));
+  })));
 });
