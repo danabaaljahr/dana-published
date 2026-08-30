@@ -5,7 +5,7 @@
 ## واجهة القراء
 - الصفحة الرئيسية مختصرة ومقسمة حسب الوظيفة، من دون تكرار نفس المادة كبطاقة كاملة في أكثر من موضع.
 - صفحات مستقلة: `archive.html`، `news.html`، `reports.html`، `essays.html`، `experience.html`، `data.html`.
-- 33 مادة أصلية كاملة: 7 أخبار، 11 تقريرًا، 14 مقالًا، وتجربة تدريبية واحدة.
+- 38 مادة منشورة حاليًا، تشمل الأرشيف الأساسي وسلسلة «ما لا يراه القارئ» بخمسة مقالات.
 - العربية والإنجليزية تشملان واجهة الموقع **ونصوص المواد كاملة**، مع ترجمة الإحصاءات ونتائج التجربة.
 - Light / Dark، بحث من بداية كلمات العنوان، حفظ محلي، «فاجئني»، وضع تركيز، تقدم القراءة، مشاركة، السابق/التالي.
 - A− / 100% / A+ لتغيير حجم الواجهة كاملة مع حفظ اختيار القارئ.
@@ -14,7 +14,7 @@
 ## Dana Studio
 - `studio.html` غير مرتبط من واجهة القراء وممنوع من الفهرسة.
 - تسجيل دخول Passwordless عبر Supabase.
-- عند أول دخول للنسخة الجديدة، تُنقل المواد الـ33 المضمنة تلقائيًا إلى CMS إذا لم تكن موجودة، وبذلك تُحسب ضمن المنشورات وتظهر في إدارة المواد والتحليلات.
+- الـCMS هو المصدر الأساسي بعد التهيئة الأولى؛ الحذف والمسودات والتعديلات لا تعيدها النسخة الثابتة تلقائيًا.
 - نشر خبر/تقرير/مقال/تجربة، حفظ مسودة، تعديل وحذف.
 - رفع صورة من الجهاز بالنقر أو السحب والإفلات، معاينة، استبدال وحذف قبل النشر.
 - حقول اختيارية للنسخة الإنجليزية؛ المادة الجديدة لا تظهر للقراء في English إلا إذا كان عنوانها ونصها الإنجليزيان مكتملين.
@@ -33,3 +33,9 @@
 - Any news item, report, essay, or training piece can remain standalone or be assigned to a series with an explicit order.
 - Readers get a dedicated Series index, an ordered series page, and in-article previous/next navigation.
 - The initial series is «ما لا يراه القارئ» with five essays in the author-approved order.
+
+## V15 — Final audited build
+- CMS articles and series load in parallel, with a safe local fallback only when the CMS cannot be reached.
+- Uploaded series/article media is rendered from Supabase in reader-facing cards/pages.
+- Published/draft state from the CMS remains authoritative when Supabase responds.
+- Final automated audit: 359/359 static checks passed, plus content, JavaScript, CSS, and live Supabase-state verification.

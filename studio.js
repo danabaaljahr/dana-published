@@ -3,11 +3,12 @@
   const URL = 'https://vffsndkoaswcnnlzpvuu.supabase.co';
   const KEY = 'sb_publishable_VdtvaVY0ph621QwYpFnjpw_8ukceobx';
   const OWNER = 'danahfahad.mb@gmail.com';
+  const PUBLIC_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYXNlIiwicmVmIjoidmZmc25ka29hc3djbm5senB2dXUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzkwNjEzMSwiZXhwIjoyMTAzNDgyMTMxfQ.SFssdBRp_XAlezCsJqGQ8xLfs8iu3vmaSBivAXfAWyE';
   const sb = window.supabase.createClient(URL, KEY, {auth:{persistSession:true,detectSessionInUrl:true}});
   const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
   const login=$('#studioLogin'), app=$('#studioApp'), content=$('#studioContent'), nav=$('#studioNav'), sectionLabel=$('#currentSection');
   const sectionNames={dashboard:'نظرة عامة',compose:'مادة جديدة',content:'إدارة المواد',series:'السلاسل',analytics:'التحليلات'};
-  let currentView='dashboard', analyticsDays=30, chartRaf=0, editingId=null;
+  let currentView='dashboard', analyticsDays=30, chartRaf=0, editingId=null, studioReady=false, enteringStudio=null;
   let localArticles=[], localSeries=[];
   const bundledArticles=Array.isArray(window.ARTICLES)?window.ARTICLES:[];
   const bundledSeries=Array.isArray(window.BUNDLED_SERIES)?window.BUNDLED_SERIES:[];
@@ -22,19 +23,26 @@
   function slugify(title){const latin=String(title).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,70);return latin || `story-${Date.now().toString(36)}`}
   function excerptFrom(body){return String(body||'').replace(/\s+/g,' ').trim().slice(0,190)}
   function saudiDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
+  async function publicRest(table,params){const r=await fetch(`${URL}/rest/v1/${table}?${params}`,{cache:'no-store',headers:{apikey:PUBLIC_ANON,Authorization:`Bearer ${PUBLIC_ANON}`}});if(!r.ok)throw new Error(`Public check ${r.status}`);return r.json()}
+  async function verifyPublicArticle(slug){const rows=await publicRest('cms_articles',`slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=slug,status,image_url&limit=1`);if(!rows?.[0])throw new Error('المادة محفوظة، لكن فحص وصول القراء لم ينجح');return rows[0]}
+  async function verifyPublicSeries(slug){const rows=await publicRest('cms_series',`slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=slug,status,cover_url&limit=1`);if(!rows?.[0])throw new Error('السلسلة محفوظة، لكن فحص وصول القراء لم ينجح');return rows[0]}
   async function isAdmin(){const {data}=await sb.from('admin_users').select('user_id').maybeSingle();return !!data}
   async function ensureOwner(){const {data:{user}}=await sb.auth.getUser();if(!user)return false;if((user.email||'').toLowerCase()!==OWNER){await sb.auth.signOut();throw new Error('هذا البريد غير مصرح له بالدخول.')}if(await isAdmin())return true;const {error}=await sb.rpc('claim_owner');if(error)throw error;return true}
 
   async function init(){
     $('#todayLabel').textContent=new Intl.DateTimeFormat('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(new Date());
     const {data:{session}}=await sb.auth.getSession();
-    if(session){try{await enterStudio()}catch(e){showLogin(e.message)}} else showLogin();
-    sb.auth.onAuthStateChange(async(event,session)=>{if(session&&['SIGNED_IN','INITIAL_SESSION'].includes(event)){try{await enterStudio()}catch(e){showLogin(e.message)}}});
+    if(session){try{await enterStudioOnce()}catch(e){showLogin(e.message)}} else showLogin();
+    sb.auth.onAuthStateChange(async(event,session)=>{if(session&&['SIGNED_IN','INITIAL_SESSION'].includes(event)&&!studioReady){try{await enterStudioOnce()}catch(e){showLogin(e.message)}}});
     bindStatic();
   }
   function showLogin(msg=''){login.hidden=false;app.hidden=true;if(msg)$('#loginStatus').textContent=msg}
-  async function enterStudio(){await ensureOwner();login.hidden=true;app.hidden=false;content.innerHTML='<div class="studio-loading"><span></span><strong>جارٍ تجهيز مساحة دانه…</strong><small>نراجع الأرشيف والمواد المنشورة.</small></div>';await Promise.all([loadLocalArticles(),loadLocalSeries()]);try{await bootstrapBundledArchive()}catch(e){console.warn('Archive bootstrap:',e);toast('تعذر مزامنة بعض مواد الأرشيف، ويمكن إعادة المحاولة بالتحديث.')}await Promise.all([loadLocalArticles(),loadLocalSeries()]);render('dashboard')}
+  async function enterStudioOnce(){if(studioReady)return;if(enteringStudio)return enteringStudio;enteringStudio=enterStudio().finally(()=>enteringStudio=null);return enteringStudio}
+  async function enterStudio(){await ensureOwner();login.hidden=true;app.hidden=false;content.innerHTML='<div class="studio-loading"><span></span><strong>جارٍ تجهيز مساحة دانه…</strong><small>نراجع الأرشيف والمواد المنشورة.</small></div>';await Promise.all([loadLocalArticles(),loadLocalSeries()]);try{await bootstrapBundledArchive()}catch(e){console.warn('Archive bootstrap:',e);toast('تعذر التحقق من تهيئة الأرشيف.')}await Promise.all([loadLocalArticles(),loadLocalSeries()]);studioReady=true;render('dashboard')}
   async function bootstrapBundledArchive(){
+    const {data:boot,error:bootError}=await sb.from('cms_settings').select('value').eq('key','archive_bootstrapped').maybeSingle();
+    if(bootError)throw bootError;if(boot?.value===true)return;
+    if(localArticles.length||localSeries.length){const {error}=await sb.from('cms_settings').upsert({key:'archive_bootstrapped',value:true,updated_at:new Date().toISOString()});if(error)throw error;return}
     if(bundledSeries.length){
       for(const sr of bundledSeries){
         const found=localSeries.find(x=>x.slug===sr.slug);
@@ -56,6 +64,7 @@
     const missing=bundledArticles.filter(a=>!known.has(a.slug));if(!missing.length)return;
     const rows=missing.map(a=>{const en=a.en||translations[a.slug]||{};return {slug:a.slug,type:a.slug==='between-study-and-practice'?'training':a.type,title:a.title,excerpt:a.excerpt||'',body:(a.body||[]).join('\n\n'),image_url:a.image||`assets/covers/${a.slug}.svg`,place:a.place||'جدة',author:'دانه بالجهر',tags:a.tags||[],featured:!!a.featured,status:'published',published_at:`${a.date}T09:00:00Z`,published_date:a.date,stats:a.stats||[],benefits:a.benefits||[],title_en:en.title||null,excerpt_en:en.excerpt||null,body_en:(en.body||[]).join('\n\n')||null,place_en:en.place||'Jeddah',tags_en:en.tags||[],stats_en:en.stats||[],benefits_en:en.benefits||[],show_en:!!(en.title&&en.body?.length),source:a.seriesSlug?'series_seed':'legacy',series_id:a.seriesSlug?(seriesIds.get(a.seriesSlug)||null):null,series_order:a.seriesOrder||null};});
     for(let i=0;i<rows.length;i+=8){const {error}=await sb.from('cms_articles').insert(rows.slice(i,i+8));if(error&&error.code!=='23505')throw error}
+    const {error:markError}=await sb.from('cms_settings').upsert({key:'archive_bootstrapped',value:true,updated_at:new Date().toISOString()});if(markError)throw markError
   }
   function bindStatic(){
     $('#sendMagicLink').addEventListener('click',sendLink);$('#signOut').addEventListener('click',async()=>{await sb.auth.signOut();location.reload()});
@@ -96,7 +105,7 @@
           <div class="field"><label>English excerpt</label><textarea name="excerpt_en" rows="3" dir="ltr" placeholder="Short English deck…">${esc(article?.excerpt_en||'')}</textarea></div>
           <div class="field"><label>Full English text</label><textarea class="body-input latin" name="body_en" dir="ltr" placeholder="Paste the complete English version here…">${esc(article?.body_en||'')}</textarea></div>
           <div class="field"><label>English tags <small>comma separated</small></label><input name="tags_en" dir="ltr" value="${esc((article?.tags_en||[]).join(', '))}"></div>
-          <label class="english-publish"><input type="checkbox" name="show_en" ${article?.show_en||englishReady?'checked':''}> إظهار المادة في النسخة الإنجليزية <small>لن تظهر بالإنجليزية إذا كان العنوان أو النص الإنجليزي فارغًا.</small></label>
+          <label class="english-publish"><input type="checkbox" name="show_en" ${article?(article.show_en?'checked':''):(englishReady?'checked':'')}> إظهار المادة في النسخة الإنجليزية <small>لن تظهر بالإنجليزية إذا كان العنوان أو النص الإنجليزي فارغًا.</small></label>
         </div></details>
       </section>
       <aside><div class="side-card">
@@ -131,7 +140,7 @@
     let submitAction='publish';$$('#articleForm button[type="submit"]').forEach(b=>b.addEventListener('click',()=>submitAction=b.dataset.action));
     $('#articleForm').addEventListener('submit',e=>saveArticle(e,submitAction,selectedFile,article,removeExisting));
   }
-  async function uploadImage(file){if(!file)return null;const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=`${new Date().getFullYear()}/${crypto.randomUUID()}.${ext}`;const {error}=await sb.storage.from('article-images').upload(path,file,{cacheControl:'3600',upsert:false});if(error)throw error;return sb.storage.from('article-images').getPublicUrl(path).data.publicUrl}
+  async function uploadImage(file){if(!file)return null;if(!/^image\/(jpeg|png|webp|gif)$/.test(file.type))throw new Error('صيغة الصورة غير مدعومة. استخدمي JPG أو PNG أو WEBP أو GIF');if(file.size>10*1024*1024)throw new Error('حجم الصورة أكبر من 10MB');const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=`${new Date().getFullYear()}/${crypto.randomUUID()}.${ext}`;const {error}=await sb.storage.from('article-images').upload(path,file,{cacheControl:'3600',upsert:false});if(error)throw error;return sb.storage.from('article-images').getPublicUrl(path).data.publicUrl}
   async function saveArticle(e,action,file,existing,removeExisting=false){
     e.preventDefault();const form=e.currentTarget,fd=new FormData(form),title=String(fd.get('title')||'').trim(),body=String(fd.get('body')||'').trim();
     if(!title||!body){toast('العنوان والنص مطلوبان');return}
@@ -143,9 +152,13 @@
       const seriesId=String(fd.get('series_id')||'').trim()||null,seriesOrder=seriesId?(Number(fd.get('series_order'))||nextSeriesOrder(seriesId)):null;
       const payload={type:fd.get('type'),title,excerpt:String(fd.get('excerpt')||'').trim()||excerptFrom(body),body,image_url:image,place:String(fd.get('place')||'جدة').trim()||'جدة',place_en:String(fd.get('place_en')||'Jeddah').trim()||'Jeddah',author:'دانه بالجهر',tags,featured:fd.get('featured')==='on',status:action==='publish'?'published':'draft',title_en:titleEn||null,excerpt_en:String(fd.get('excerpt_en')||'').trim()||null,body_en:bodyEn||null,tags_en:tagsEn,show_en:fd.get('show_en')==='on'&&!!titleEn&&!!bodyEn,series_id:seriesId,series_order:seriesOrder};
       if(action==='publish'){payload.published_at=existing?.published_at||now;payload.published_date=existing?.published_date||saudiDate()}
-      if(editingId){const {error}=await sb.from('cms_articles').update(payload).eq('id',editingId);if(error)throw error}
-      else{payload.slug=slugify(title);let {error}=await sb.from('cms_articles').insert(payload);if(error?.code==='23505'){payload.slug=`${payload.slug}-${Date.now().toString(36).slice(-5)}`;({error}=await sb.from('cms_articles').insert(payload))}if(error)throw error}
-      await loadLocalArticles();toast(action==='publish'?'تم نشر المادة وظهورها للقراء':'تم حفظ المسودة');render('content');
+      let savedRow=null;
+      if(editingId){const {data,error}=await sb.from('cms_articles').update(payload).eq('id',editingId).select('id,slug,status,image_url,published_at,published_date').single();if(error)throw error;savedRow=data}
+      else{payload.slug=slugify(title);let result=await sb.from('cms_articles').insert(payload).select('id,slug,status,image_url,published_at,published_date').single();if(result.error?.code==='23505'){payload.slug=`${payload.slug}-${Date.now().toString(36).slice(-5)}`;result=await sb.from('cms_articles').insert(payload).select('id,slug,status,image_url,published_at,published_date').single()}if(result.error)throw result.error;savedRow=result.data}
+      if(action==='publish'&&(!savedRow||savedRow.status!=='published'))throw new Error('لم يتم تأكيد حالة النشر في قاعدة البيانات');
+      if(action==='publish'&&file&&!savedRow?.image_url)throw new Error('تم رفع الصورة لكن لم يُحفظ رابطها مع المادة');
+      if(action==='publish'){const publicRow=await verifyPublicArticle(savedRow.slug);if(file&&!publicRow.image_url)throw new Error('المادة متاحة للقراء لكن رابط الصورة غير ظاهر للعامة')}
+      await loadLocalArticles();toast(action==='publish'?'تم النشر والتحقق من وصول المادة للقراء':'تم حفظ المسودة');render('content');
     }catch(err){toast(`تعذر الحفظ: ${err.message}`)}finally{buttons.forEach(x=>x.disabled=false)}
   }
 
@@ -182,15 +195,16 @@
     e.preventDefault();const form=e.currentTarget,fd=new FormData(form),title=String(fd.get('title')||'').trim();if(!title){toast('عنوان السلسلة مطلوب');return}
     const submit=form.querySelector('button[type="submit"]');submit.disabled=true;
     try{let cover=existing?.cover_url||null;const file=$('#seriesCover')?.files?.[0];if(file)cover=await uploadImage(file);const payload={title,description:String(fd.get('description')||'').trim(),title_en:String(fd.get('title_en')||'').trim()||null,description_en:String(fd.get('description_en')||'').trim()||null,cover_url:cover,status:fd.get('status')||'published',is_ongoing:fd.get('is_ongoing')==='on',featured:fd.get('featured')==='on'};
-      if(existing){const {error}=await sb.from('cms_series').update(payload).eq('id',existing.id);if(error)throw error}else{payload.slug=`series-${Date.now().toString(36)}`;let {error}=await sb.from('cms_series').insert(payload);if(error)throw error}
-      await loadLocalSeries();toast(existing?'تم تحديث السلسلة':'تم إنشاء السلسلة');renderSeriesManager();
+      let savedSeries=null;if(existing){const {data,error}=await sb.from('cms_series').update(payload).eq('id',existing.id).select('id,slug,status,cover_url').single();if(error)throw error;savedSeries=data}else{payload.slug=`series-${Date.now().toString(36)}`;let {data,error}=await sb.from('cms_series').insert(payload).select('id,slug,status,cover_url').single();if(error)throw error;savedSeries=data}
+      if(savedSeries?.status==='published'){const publicSeries=await verifyPublicSeries(savedSeries.slug);if(file&&!publicSeries.cover_url)throw new Error('السلسلة متاحة للقراء لكن رابط الغلاف غير ظاهر للعامة')}
+      await loadLocalSeries();toast(existing?'تم تحديث السلسلة والتحقق منها':'تم إنشاء السلسلة والتحقق منها');renderSeriesManager();
     }catch(err){toast(`تعذر حفظ السلسلة: ${err.message}`)}finally{submit.disabled=false}
   }
   async function deleteSeries(id){const sr=localSeries.find(x=>x.id===id);if(!sr||!confirm(`حذف سلسلة «${sr.title}»؟ المواد نفسها لن تُحذف، وستتحول إلى مواد مستقلة.`))return;const {error}=await sb.from('cms_series').delete().eq('id',id);if(error){toast(error.message);return}await Promise.all([loadLocalSeries(),loadLocalArticles()]);renderSeriesManager();toast('تم حذف السلسلة مع إبقاء موادها')}
   async function moveSeriesArticle(seriesId,articleId,direction){const members=localArticles.filter(a=>a.series_id===seriesId).sort((a,b)=>(Number(a.series_order)||9999)-(Number(b.series_order)||9999)),idx=members.findIndex(a=>a.id===articleId),other=direction==='up'?members[idx-1]:members[idx+1];if(idx<0||!other)return;const cur=members[idx],curOrder=Number(cur.series_order)||idx+1,otherOrder=Number(other.series_order)||(direction==='up'?idx:idx+2);const {error:e1}=await sb.from('cms_articles').update({series_order:otherOrder}).eq('id',cur.id);if(e1){toast(e1.message);return}const {error:e2}=await sb.from('cms_articles').update({series_order:curOrder}).eq('id',other.id);if(e2){toast(e2.message);return}await loadLocalArticles();renderSeriesManager();}
 
   function renderContent(){content.innerHTML=`<div class="view-head"><div><span class="eyebrow">CONTENT LIBRARY</span><h1>المواد</h1><p>أرشيفك الصحفي كاملًا: المواد الحالية والجديدة، المنشورة والمسودات.</p></div><button class="primary-btn" style="width:auto" id="newFromContent">مادة جديدة <b>+</b></button></div><div class="content-toolbar"><input id="contentSearch" placeholder="ابحثي في العناوين…"><select id="contentFilter"><option value="all">الكل</option><option value="published">منشور</option><option value="draft">مسودة</option><option value="news">أخبار</option><option value="report">تقارير</option><option value="article">مقالات</option><option value="training">تجربة</option></select></div><div class="content-table" id="contentTable"></div>`;$('#newFromContent').onclick=()=>render('compose');$('#contentSearch').addEventListener('input',renderContentRows);$('#contentFilter').addEventListener('change',renderContentRows);renderContentRows()}
-  function renderContentRows(){const root=$('#contentTable');if(!root)return;const q=$('#contentSearch').value.trim().toLowerCase(),f=$('#contentFilter').value;let rows=localArticles.filter(a=>(!q||a.title.toLowerCase().includes(q))&&(f==='all'||a.status===f||a.type===f));root.innerHTML=`<div class="content-row head"><span>الصورة</span><span>العنوان</span><span>النوع</span><span>الحالة</span><span>التاريخ</span><span>إدارة</span></div>`+(rows.map(a=>`<div class="content-row"><img class="content-thumb" src="${esc(a.image_url||fallback[a.type])}" alt=""><div class="content-title"><strong>${esc(a.title)}</strong><small>${esc(a.slug)}</small></div><span>${typeLabel[a.type]||a.type}</span><span class="status-pill ${a.status==='draft'?'draft':''}">${a.status==='published'?'منشور':'مسودة'}</span><span>${fmtDate(a.published_at||a.created_at)}</span><div class="row-actions"><button data-edit="${a.id}">تعديل</button><button data-delete="${a.id}">حذف</button></div></div>`).join('')||'<div class="empty-state">لا توجد مواد بعد.</div>');$$('[data-edit]',root).forEach(b=>b.onclick=()=>renderCompose(localArticles.find(a=>a.id===b.dataset.edit)));$$('[data-delete]',root).forEach(b=>b.onclick=()=>deleteArticle(b.dataset.delete))}
+  function renderContentRows(){const root=$('#contentTable');if(!root)return;const q=$('#contentSearch').value.trim().toLowerCase(),f=$('#contentFilter').value;let rows=localArticles.filter(a=>(!q||a.title.toLowerCase().includes(q))&&(f==='all'||a.status===f||a.type===f));root.innerHTML=`<div class="content-row head"><span>الصورة</span><span>العنوان</span><span>النوع</span><span>الحالة</span><span>التاريخ</span><span>إدارة</span></div>`+(rows.map(a=>`<div class="content-row"><img class="content-thumb" src="${esc(a.image_url||fallback[a.type])}" alt="" onerror="this.onerror=null;this.src='${fallback[a.type]||fallback.article}'"><div class="content-title"><strong>${esc(a.title)}</strong><small>${esc(a.slug)}</small></div><span>${typeLabel[a.type]||a.type}</span><span class="status-pill ${a.status==='draft'?'draft':''}">${a.status==='published'?'منشور':'مسودة'}</span><span>${fmtDate(a.published_at||a.created_at)}</span><div class="row-actions">${a.status==='published'?`<button data-preview="${esc(a.slug)}">عرض</button>`:''}<button data-edit="${a.id}">تعديل</button><button data-delete="${a.id}">حذف</button></div></div>`).join('')||'<div class="empty-state">لا توجد مواد بعد.</div>');$$('[data-preview]',root).forEach(b=>b.onclick=()=>window.open(`index.html?article=${encodeURIComponent(b.dataset.preview)}`,'_blank','noopener'));$$('[data-edit]',root).forEach(b=>b.onclick=()=>renderCompose(localArticles.find(a=>a.id===b.dataset.edit)));$$('[data-delete]',root).forEach(b=>b.onclick=()=>deleteArticle(b.dataset.delete))}
   async function deleteArticle(id){if(!confirm('حذف هذه المادة نهائيًا؟'))return;const {error}=await sb.from('cms_articles').delete().eq('id',id);if(error){toast(error.message);return}await loadLocalArticles();renderContentRows();toast('تم حذف المادة')}
 
   async function renderAnalytics(){content.innerHTML=`<div class="view-head"><div><span class="eyebrow">AUDIENCE INTELLIGENCE</span><h1>التحليلات</h1><p>زيارة، قراءة، تفاعل، وعمق التصفح — تتحدث من الموقع الحقيقي.</p></div><div class="range" id="analyticsRange"><button data-days="7">7 أيام</button><button data-days="30" class="active">30 يوم</button><button data-days="90">90 يوم</button></div></div><div id="analyticsBody"><div class="empty-state">جارٍ تحميل البيانات…</div></div>`;$$('[data-days]').forEach(b=>{b.classList.toggle('active',+b.dataset.days===analyticsDays);b.onclick=()=>{analyticsDays=+b.dataset.days;renderAnalytics()}});try{const a=await getAnalytics(analyticsDays);paintAnalytics(a)}catch(e){$('#analyticsBody').innerHTML=`<div class="panel">تعذر تحميل التحليلات: ${esc(e.message)}</div>`}}

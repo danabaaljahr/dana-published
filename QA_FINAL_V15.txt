@@ -1,0 +1,34 @@
+DANA PUBLISHED V15 — FINAL AUDIT
+Date: 2026-08-30
+
+Automated static checks: 359 / 359 passed
+Bundled content checks:
+- 38 articles
+- 38 unique slugs
+- English version present for all 38 bundled articles
+- 1 editorial series
+- 5 series members in the approved order
+JavaScript syntax: passed
+HTML parsing/local-reference checks: passed
+CSS parsing: 0 parse errors in styles.css and studio.css
+Service worker: V15 cache namespace and core routes verified
+Mobile drawer: independent vertical touch scroll rules verified
+Reader title scaling: tied to whole-page root scale and responsive breakpoints
+Reader article image: uploaded non-SVG image displayed; default SVG is not repeated inside article body
+CMS behavior: published CMS state is authoritative when reachable; network failure keeps local fallback instead of blanking the site
+CMS loading: series and articles load in parallel
+Studio publishing: public verification after publish; uploaded image URL verification enabled
+Series: cover URL used in homepage card and series page; unlimited independent series supported
+
+Live Supabase state verified via database connector:
+- 38 published articles / 38 unique published slugs
+- 1 published series
+- archive_bootstrapped = true
+- article-images storage contains the currently uploaded series cover
+- "ما لا يراه القارئ" cover URL exists
+- Series member order verified as 1,2,3,4,5 in the approved order
+- Public RLS allows published content and blocks drafts
+
+Notes:
+- The five current series essays do not have individual uploaded article images in the database; they use the article-category fallback cover until individual images are added from Studio.
+- The series itself does have its uploaded cover and V15 displays it in the reader UI.

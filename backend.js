@@ -21,6 +21,7 @@
       slug:row.slug, type:row.type, typeLabel:cat==='training'?'تجربة تدريبية':(row.type==='news'?'خبر':row.type==='report'?'تقرير':'مقال'),
       title:row.title, excerpt:row.excerpt||'', body:splitBody(row.body), place:row.place||'جدة', author:row.author||'دانه بالجهر', tags:row.tags||[],
       date:row.published_date || (row.published_at?String(row.published_at).slice(0,10):String(row.created_at||'').slice(0,10)),
+      publishedAt:row.published_at || row.created_at || row.published_date || '',
       image:row.image_url || fallback[cat], featured:!!row.featured, pick:!!row.featured,
       stats:Array.isArray(row.stats)?row.stats:[], benefits:Array.isArray(row.benefits)?row.benefits:[],
       seriesId:row.series_id||null, seriesOrder:Number.isFinite(Number(row.series_order))?Number(row.series_order):null,
@@ -28,8 +29,8 @@
     };
   }
   async function request(path, options={}){
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),2200);
-    try{const r=await fetch(API+path,{...options,signal:controller.signal,headers:{...headers,...(options.headers||{})}});if(!r.ok)throw new Error(`Backend ${r.status}`);const text=await r.text();return text?JSON.parse(text):null}finally{clearTimeout(timer)}
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+    try{const r=await fetch(API+path,{...options,cache:'no-store',signal:controller.signal,headers:{...headers,...(options.headers||{})}});if(!r.ok)throw new Error(`Backend ${r.status}`);const text=await r.text();return text?JSON.parse(text):null}finally{clearTimeout(timer)}
   }
   function normalizeSeries(row){
     return {
@@ -40,23 +41,15 @@
   }
   async function loadPublishedSeries(staticSeries=[]){
     try{
-      const rows=await request('/cms_series?status=eq.published&select=*&order=featured.desc,created_at.asc');
-      const remote=(rows||[]).map(normalizeSeries);
-      if(!remote.length) return staticSeries;
-      const bySlug=new Map(staticSeries.map(s=>[s.slug,s]));
-      remote.forEach(s=>bySlug.set(s.slug,{...(bySlug.get(s.slug)||{}),...s}));
-      return [...bySlug.values()];
-    }catch(e){ console.warn('Using bundled series.',e); return staticSeries; }
+      const rows=await request('/cms_series?status=eq.published&select=*&order=featured.desc,created_at.desc');
+      return (rows||[]).map(normalizeSeries);
+    }catch(e){ console.error('Series CMS unavailable.',e); return null; }
   }
   async function loadPublishedArticles(staticArticles=[]){
     try{
       const rows=await request('/cms_articles?status=eq.published&select=*&order=published_date.desc.nullslast,published_at.desc');
-      const remote=(rows||[]).map(normalize);
-      if(!remote.length) return staticArticles;
-      const bySlug=new Map(staticArticles.map(a=>[a.slug,a]));
-      remote.forEach(a=>bySlug.set(a.slug,{...(bySlug.get(a.slug)||{}),...a}));
-      return [...bySlug.values()];
-    }catch(e){ console.warn('Using bundled archive.',e); return staticArticles; }
+      return (rows||[]).map(normalize);
+    }catch(e){ console.error('Article CMS unavailable.',e); return null; }
   }
   const visitorKey=()=>{let k=localStorage.getItem('dana-visitor');if(!k){k=crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`;localStorage.setItem('dana-visitor',k)}return k};
   const sessionKey=()=>{let k=sessionStorage.getItem('dana-session');if(!k){k=crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`;sessionStorage.setItem('dana-session',k)}return k};

@@ -171,3 +171,16 @@ html[lang="ar"] .series-hero h1{letter-spacing:0;line-height:1.05}
 .article-series-link span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.article-series-link b{font:600 .7rem "Space Grotesk";white-space:nowrap;color:var(--ink)}
 @media(max-width:980px){.series-preview-grid,.series-grid{grid-template-columns:1fr 1fr}.series-hero-grid{grid-template-columns:1fr}.series-hero-mark{width:min(18rem,62vw);justify-self:start}.series-row{grid-template-columns:3.5rem minmax(0,1fr) auto}}
 @media(max-width:640px){.series-preview-grid,.series-grid{grid-template-columns:1fr}.series-card{min-height:20rem}.series-hero{padding-top:2rem}.series-hero h1{font-size:clamp(2.7rem,15vw,5rem)}.series-hero-mark{width:min(14rem,58vw)}.series-row{grid-template-columns:2.5rem minmax(0,1fr);align-items:start}.series-row>.arrow{display:none}.series-no{font-size:1.6rem}.series-row p{-webkit-line-clamp:3}.article-series-link{border-radius:1rem;align-items:flex-start;flex-direction:column;gap:.3rem}}
+
+
+/* V14 — CMS media is visible in the reader UI */
+.series-card{padding:0}
+.series-card-body{min-height:25rem;padding:1.5rem;display:flex;flex-direction:column;justify-content:space-between;gap:2.5rem;position:relative;z-index:1}
+.series-card.has-cover{background:var(--paper)}
+.series-card-cover{width:100%;aspect-ratio:16/9;overflow:hidden;background:var(--soft);border-bottom:1px solid var(--line)}
+.series-card-cover img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+.series-card.has-cover:hover .series-card-cover img{transform:scale(1.025)}
+.series-card.has-cover:before{display:none}
+.series-hero-cover{margin:0;width:100%;min-height:22rem;max-height:34rem;border-radius:2rem;overflow:hidden;background:var(--soft);border:1px solid var(--line)}
+.series-hero-cover img{display:block;width:100%;height:100%;min-height:22rem;max-height:34rem;object-fit:cover}
+@media(max-width:640px){.series-card-body{min-height:18rem}.series-card-cover{aspect-ratio:4/3}.series-hero-cover,.series-hero-cover img{min-height:15rem;border-radius:1.25rem}}
