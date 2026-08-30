@@ -22,6 +22,7 @@
       title:row.title, excerpt:row.excerpt||'', body:splitBody(row.body), place:row.place||'جدة', author:row.author||'دانه بالجهر', tags:row.tags||[],
       date:row.published_date || (row.published_at?String(row.published_at).slice(0,10):String(row.created_at||'').slice(0,10)),
       publishedAt:row.published_at || row.created_at || row.published_date || '',
+      updatedAt:row.updated_at || row.published_at || row.created_at || row.published_date || '',
       image:row.image_url || fallback[cat], featured:!!row.featured, pick:!!row.featured,
       stats:Array.isArray(row.stats)?row.stats:[], benefits:Array.isArray(row.benefits)?row.benefits:[],
       seriesId:row.series_id||null, seriesOrder:Number.isFinite(Number(row.series_order))?Number(row.series_order):null,
@@ -29,12 +30,12 @@
     };
   }
   async function request(path, options={}){
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
-    try{const r=await fetch(API+path,{...options,cache:'no-store',signal:controller.signal,headers:{...headers,...(options.headers||{})}});if(!r.ok)throw new Error(`Backend ${r.status}`);const text=await r.text();return text?JSON.parse(text):null}finally{clearTimeout(timer)}
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
+    try{const r=await fetch(API+path,{...options,cache:'no-store',signal:controller.signal,headers:{...headers,'Cache-Control':'no-cache',...((options&&options.headers)||{})}});if(!r.ok)throw new Error(`Backend ${r.status}`);const text=await r.text();return text?JSON.parse(text):null}finally{clearTimeout(timer)}
   }
   function normalizeSeries(row){
     return {
-      id:row.id||null, slug:row.slug, title:row.title, description:row.description||'', coverUrl:row.cover_url||'',
+      id:row.id||null, slug:row.slug, title:row.title, description:row.description||'', coverUrl:row.cover_url||'', updatedAt:row.updated_at||row.created_at||'',
       title_en:row.title_en||'', description_en:row.description_en||'', status:row.status||'published',
       isOngoing:row.is_ongoing!==false, featured:!!row.featured, cms:!!row.id
     };

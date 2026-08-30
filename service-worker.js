@@ -1,5 +1,14 @@
-const CACHE='dana-editorial-v15-full-audit';
+const CACHE='dana-editorial-v16-live-media-refresh';
 const CORE=['./','./index.html','./archive.html','./news.html','./reports.html','./essays.html','./series.html','./experience.html','./data.html','./styles.css','./app.js','./backend.js','./articles.js','./translations-en.js','./series-data.js','./manifest.webmanifest','./assets/brand/dana-mark.png','./assets/brand/favicon.png','./assets/brand/icon-192.png','./assets/brand/icon-512.png','./assets/covers/default-news.svg','./assets/covers/default-report.svg','./assets/covers/default-article.svg','./assets/covers/default-training.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin||/studio\.(html|js|css)$/.test(u.pathname))return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).then(r=>{if(r?.ok)caches.open(CACHE).then(c=>c.put(e.request,r.clone()));return r}).catch(()=>caches.match(e.request).then(x=>x||caches.match('./index.html'))));return}e.respondWith(caches.match(e.request).then(x=>x||fetch(e.request).then(r=>{if(r?.ok)caches.open(CACHE).then(c=>c.put(e.request,r.clone()));return r})))});
+self.addEventListener('fetch',e=>{
+  const u=new URL(e.request.url);
+  if(e.request.method!=='GET'||u.origin!==location.origin||/studio\.(html|js|css)$/.test(u.pathname))return;
+  const networkFirst=e.request.mode==='navigate'||['script','style'].includes(e.request.destination);
+  if(networkFirst){
+    e.respondWith(fetch(e.request,{cache:'no-store'}).then(r=>{if(r?.ok)caches.open(CACHE).then(c=>c.put(e.request,r.clone()));return r}).catch(()=>caches.match(e.request).then(x=>x||caches.match('./index.html'))));
+    return;
+  }
+  e.respondWith(caches.match(e.request).then(x=>x||fetch(e.request).then(r=>{if(r?.ok)caches.open(CACHE).then(c=>c.put(e.request,r.clone()));return r})));
+});

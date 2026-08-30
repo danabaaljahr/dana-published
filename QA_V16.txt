@@ -1,0 +1,12 @@
+Dana Published V16 — Live Media Refresh QA
+
+Fixes targeted at uploaded-image visibility:
+- Uploaded series/article media is read from Supabase CMS fields.
+- Supabase media URLs get an updated_at cache-busting query parameter.
+- Reader refetches CMS on tab focus / visibility return / bfcache restore.
+- Home, series and archive revalidate once per minute while visible.
+- Service worker uses network-first for HTML, JS and CSS and a new cache namespace.
+- Studio uploads new files with cacheControl=0 and stores a unique UUID path.
+- Backend REST requests are cache:no-store + Cache-Control:no-cache.
+
+The latest user upload observed in Supabase is stored and linked to series what-reader-does-not-see.
