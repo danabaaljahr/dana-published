@@ -23,12 +23,30 @@
       date:row.published_date || (row.published_at?String(row.published_at).slice(0,10):String(row.created_at||'').slice(0,10)),
       image:row.image_url || fallback[cat], featured:!!row.featured, pick:!!row.featured,
       stats:Array.isArray(row.stats)?row.stats:[], benefits:Array.isArray(row.benefits)?row.benefits:[],
+      seriesId:row.series_id||null, seriesOrder:Number.isFinite(Number(row.series_order))?Number(row.series_order):null,
       en, showEnglish:row.show_en!==false && !!en, cms:true, status:row.status
     };
   }
   async function request(path, options={}){
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),2200);
     try{const r=await fetch(API+path,{...options,signal:controller.signal,headers:{...headers,...(options.headers||{})}});if(!r.ok)throw new Error(`Backend ${r.status}`);const text=await r.text();return text?JSON.parse(text):null}finally{clearTimeout(timer)}
+  }
+  function normalizeSeries(row){
+    return {
+      id:row.id||null, slug:row.slug, title:row.title, description:row.description||'', coverUrl:row.cover_url||'',
+      title_en:row.title_en||'', description_en:row.description_en||'', status:row.status||'published',
+      isOngoing:row.is_ongoing!==false, featured:!!row.featured, cms:!!row.id
+    };
+  }
+  async function loadPublishedSeries(staticSeries=[]){
+    try{
+      const rows=await request('/cms_series?status=eq.published&select=*&order=featured.desc,created_at.asc');
+      const remote=(rows||[]).map(normalizeSeries);
+      if(!remote.length) return staticSeries;
+      const bySlug=new Map(staticSeries.map(s=>[s.slug,s]));
+      remote.forEach(s=>bySlug.set(s.slug,{...(bySlug.get(s.slug)||{}),...s}));
+      return [...bySlug.values()];
+    }catch(e){ console.warn('Using bundled series.',e); return staticSeries; }
   }
   async function loadPublishedArticles(staticArticles=[]){
     try{
@@ -53,5 +71,5 @@
   const seenSession='dana-session-seen';
   if(!sessionStorage.getItem(seenSession)){sessionStorage.setItem(seenSession,'1');event('session_start');}
   event('page_view');
-  window.DanaBackend={PROJECT_URL,ANON_KEY,loadPublishedArticles,event,articleView:(s)=>event('article_view',s),search:(q)=>event('search',null,{query:q}),share:(s)=>event('share',s),save:(s)=>event('save',s),leave:(s,m={})=>event('article_leave',s,m)};
+  window.DanaBackend={PROJECT_URL,ANON_KEY,loadPublishedArticles,loadPublishedSeries,event,articleView:(s)=>event('article_view',s),search:(q)=>event('search',null,{query:q}),share:(s)=>event('share',s),save:(s)=>event('save',s),leave:(s,m={})=>event('article_leave',s,m)};
 })();

@@ -26,3 +26,10 @@
 إعداد Supabase الخاص بـSite URL وRedirect URL تم تصميم الموقع على أساس:
 - `https://danabaaljahr.github.io/dana-published/`
 - `https://danabaaljahr.github.io/dana-published/studio.html`
+
+
+## Editorial Series (V13)
+- Studio now supports unlimited independent editorial series.
+- Any news item, report, essay, or training piece can remain standalone or be assigned to a series with an explicit order.
+- Readers get a dedicated Series index, an ordered series page, and in-article previous/next navigation.
+- The initial series is «ما لا يراه القارئ» with five essays in the author-approved order.

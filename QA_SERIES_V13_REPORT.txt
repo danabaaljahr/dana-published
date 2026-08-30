@@ -1,0 +1,35 @@
+DANA PUBLISHED — V13 SERIES QA
+Date: 2026-08-30
+
+Feature scope
+- Unlimited independent editorial series in Studio.
+- Series can contain news, reports, essays, or training pieces.
+- Standalone content remains supported.
+- Series title/description/status/ongoing/featured/cover + English fields supported.
+- Article compose form can assign/remove a series and set its order.
+- Series manager can create/edit/delete series, add material, and reorder members.
+- Public Series index and dedicated ordered series page included.
+- Article reader displays series identity, part number, and series-aware previous/next navigation.
+
+Seeded series
+ما لا يراه القارئ
+01 الخبر الذي مات قبل أن يصل إلى المحرر
+02 ساعتان من الكلام اختفتا في أربعة أسطر
+03 ثلاث لغات صنعت ثلاث حقائق
+04 الخبر الصحيح الذي كذب
+05 العنوان سرق الخبر
+
+Content checks
+- Existing bundled archive: 33 items.
+- New series items: 5.
+- Bundled total: 38 unique slugs.
+- Full English translations bundled for all five new items.
+- Supabase published count verified: 38.
+
+Technical QA
+- JavaScript syntax checks passed: app.js, backend.js, studio.js, series-data.js, articles.js, translations-en.js, service-worker.js.
+- Public HTML local asset/link checks passed.
+- Series scripts present on all public pages and Studio.
+- Service worker cache bumped to V13 and includes series.html + series-data.js.
+- CSS brace checks passed.
+- Mobile drawer scroll fix retained from V12.

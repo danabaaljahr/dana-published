@@ -6,10 +6,11 @@
   const sb = window.supabase.createClient(URL, KEY, {auth:{persistSession:true,detectSessionInUrl:true}});
   const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
   const login=$('#studioLogin'), app=$('#studioApp'), content=$('#studioContent'), nav=$('#studioNav'), sectionLabel=$('#currentSection');
-  const sectionNames={dashboard:'نظرة عامة',compose:'مادة جديدة',content:'إدارة المواد',analytics:'التحليلات'};
+  const sectionNames={dashboard:'نظرة عامة',compose:'مادة جديدة',content:'إدارة المواد',series:'السلاسل',analytics:'التحليلات'};
   let currentView='dashboard', analyticsDays=30, chartRaf=0, editingId=null;
-  let localArticles=[];
+  let localArticles=[], localSeries=[];
   const bundledArticles=Array.isArray(window.ARTICLES)?window.ARTICLES:[];
+  const bundledSeries=Array.isArray(window.BUNDLED_SERIES)?window.BUNDLED_SERIES:[];
 
   const fallback={news:'assets/covers/default-news.svg',report:'assets/covers/default-report.svg',article:'assets/covers/default-article.svg',training:'assets/covers/default-training.svg'};
   const typeLabel={news:'خبر',report:'تقرير',article:'مقال',training:'تجربة تدريبية'};
@@ -32,25 +33,43 @@
     bindStatic();
   }
   function showLogin(msg=''){login.hidden=false;app.hidden=true;if(msg)$('#loginStatus').textContent=msg}
-  async function enterStudio(){await ensureOwner();login.hidden=true;app.hidden=false;content.innerHTML='<div class="studio-loading"><span></span><strong>جارٍ تجهيز مساحة دانه…</strong><small>نراجع الأرشيف والمواد المنشورة.</small></div>';await loadLocalArticles();try{await bootstrapBundledArchive()}catch(e){console.warn('Archive bootstrap:',e);toast('تعذر مزامنة بعض مواد الأرشيف، ويمكن إعادة المحاولة بالتحديث.')}await loadLocalArticles();render('dashboard')}
+  async function enterStudio(){await ensureOwner();login.hidden=true;app.hidden=false;content.innerHTML='<div class="studio-loading"><span></span><strong>جارٍ تجهيز مساحة دانه…</strong><small>نراجع الأرشيف والمواد المنشورة.</small></div>';await Promise.all([loadLocalArticles(),loadLocalSeries()]);try{await bootstrapBundledArchive()}catch(e){console.warn('Archive bootstrap:',e);toast('تعذر مزامنة بعض مواد الأرشيف، ويمكن إعادة المحاولة بالتحديث.')}await Promise.all([loadLocalArticles(),loadLocalSeries()]);render('dashboard')}
   async function bootstrapBundledArchive(){
+    if(bundledSeries.length){
+      for(const sr of bundledSeries){
+        const found=localSeries.find(x=>x.slug===sr.slug);
+        if(found)continue;
+        const row={slug:sr.slug,title:sr.title,description:sr.description||'',title_en:sr.title_en||null,description_en:sr.description_en||null,cover_url:sr.cover_url||null,status:sr.status||'published',is_ongoing:sr.is_ongoing!==false,featured:!!sr.featured};
+        const {error}=await sb.from('cms_series').insert(row);if(error&&error.code!=='23505')throw error;
+      }
+      await loadLocalSeries();
+    }
     if(!bundledArticles.length)return;
     const known=new Set(localArticles.map(a=>a.slug)), translations=window.ARTICLE_TRANSLATIONS_EN||{};
+    const seriesIds=new Map(localSeries.map(x=>[x.slug,x.id]));
+    // Fill only missing English fields for bundled material; never overwrite an existing translation or Arabic edit.
+    for(const existing of localArticles.filter(a=>known.has(a.slug)&&a.__db_has_en===false)){
+      const bundled=bundledArticles.find(a=>a.slug===existing.slug), en=bundled?.en||translations[existing.slug]||null;if(!en?.body?.length)continue;
+      const patch={title_en:existing.title_en||en.title||null,excerpt_en:existing.excerpt_en||en.excerpt||null,body_en:en.body.join('\n\n'),place_en:existing.place_en||en.place||'Jeddah',tags_en:(existing.tags_en?.length?existing.tags_en:(en.tags||[])),show_en:true};
+      const {error}=await sb.from('cms_articles').update(patch).eq('id',existing.id);if(error)throw error;
+    }
     const missing=bundledArticles.filter(a=>!known.has(a.slug));if(!missing.length)return;
-    const rows=missing.map(a=>{const en=translations[a.slug]||{};return {slug:a.slug,type:a.slug==='between-study-and-practice'?'training':a.type,title:a.title,excerpt:a.excerpt||'',body:(a.body||[]).join('\n\n'),image_url:a.image||`assets/covers/${a.slug}.svg`,place:a.place||'جدة',author:'دانه بالجهر',tags:a.tags||[],featured:!!a.featured,status:'published',published_at:`${a.date}T09:00:00Z`,published_date:a.date,stats:a.stats||[],benefits:a.benefits||[],title_en:en.title||null,excerpt_en:en.excerpt||null,body_en:(en.body||[]).join('\n\n')||null,place_en:'Jeddah',tags_en:en.tags||[],stats_en:en.stats||[],benefits_en:en.benefits||[],show_en:!!(en.title&&en.body?.length),source:'legacy'};});
+    const rows=missing.map(a=>{const en=a.en||translations[a.slug]||{};return {slug:a.slug,type:a.slug==='between-study-and-practice'?'training':a.type,title:a.title,excerpt:a.excerpt||'',body:(a.body||[]).join('\n\n'),image_url:a.image||`assets/covers/${a.slug}.svg`,place:a.place||'جدة',author:'دانه بالجهر',tags:a.tags||[],featured:!!a.featured,status:'published',published_at:`${a.date}T09:00:00Z`,published_date:a.date,stats:a.stats||[],benefits:a.benefits||[],title_en:en.title||null,excerpt_en:en.excerpt||null,body_en:(en.body||[]).join('\n\n')||null,place_en:en.place||'Jeddah',tags_en:en.tags||[],stats_en:en.stats||[],benefits_en:en.benefits||[],show_en:!!(en.title&&en.body?.length),source:a.seriesSlug?'series_seed':'legacy',series_id:a.seriesSlug?(seriesIds.get(a.seriesSlug)||null):null,series_order:a.seriesOrder||null};});
     for(let i=0;i<rows.length;i+=8){const {error}=await sb.from('cms_articles').insert(rows.slice(i,i+8));if(error&&error.code!=='23505')throw error}
   }
   function bindStatic(){
     $('#sendMagicLink').addEventListener('click',sendLink);$('#signOut').addEventListener('click',async()=>{await sb.auth.signOut();location.reload()});
     nav.addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)render(b.dataset.view)});
-    $('#refreshData').addEventListener('click',async()=>{await loadLocalArticles();render(currentView);toast('تم تحديث البيانات')});
+    $('#refreshData').addEventListener('click',async()=>{await Promise.all([loadLocalArticles(),loadLocalSeries()]);render(currentView);toast('تم تحديث البيانات')});
     $('#mobileNav').addEventListener('click',()=>$('.studio-sidebar').classList.toggle('open'));
   }
   async function sendLink(){const btn=$('#sendMagicLink');btn.disabled=true;$('#loginStatus').textContent='جارٍ إرسال رابط الدخول…';const redirectTo=location.origin+location.pathname;const {error}=await sb.auth.signInWithOtp({email:OWNER,options:{emailRedirectTo:redirectTo,shouldCreateUser:true}});btn.disabled=false;if(error){$('#loginStatus').textContent=`تعذر الإرسال: ${error.message}`;return}$('#loginStatus').textContent='تم الإرسال. افتحي الرابط الذي وصل إلى بريدك ثم ستدخلين اللوحة مباشرة.'}
-  async function loadLocalArticles(){const {data,error}=await sb.from('cms_articles').select('*').order('updated_at',{ascending:false});if(error)throw error;localArticles=data||[]}
-  function render(view){currentView=view;sectionLabel.textContent=sectionNames[view]||view;$$('[data-view]',nav).forEach(b=>b.classList.toggle('active',b.dataset.view===view));$('.studio-sidebar').classList.remove('open');if(view==='dashboard')renderDashboard();if(view==='compose')renderCompose();if(view==='content')renderContent();if(view==='analytics')renderAnalytics()}
+  async function loadLocalArticles(){const {data,error}=await sb.from('cms_articles').select('*').order('updated_at',{ascending:false});if(error)throw error;const translations=window.ARTICLE_TRANSLATIONS_EN||{}, bundledBySlug=new Map(bundledArticles.map(a=>[a.slug,a]));localArticles=(data||[]).map(row=>{const bundled=bundledBySlug.get(row.slug), en=bundled?.en||translations[row.slug]||null, dbHasEn=!!String(row.body_en||'').trim();if(!dbHasEn&&en?.body?.length){return {...row,__db_has_en:false,title_en:row.title_en||en.title||null,excerpt_en:row.excerpt_en||en.excerpt||null,body_en:en.body.join('\n\n'),place_en:row.place_en||en.place||'Jeddah',tags_en:(row.tags_en?.length?row.tags_en:(en.tags||[])),show_en:true}}return {...row,__db_has_en:dbHasEn}})}
+  async function loadLocalSeries(){const {data,error}=await sb.from('cms_series').select('*').order('featured',{ascending:false}).order('created_at',{ascending:true});if(error)throw error;localSeries=data||[]}
+  function render(view){currentView=view;sectionLabel.textContent=sectionNames[view]||view;$$('[data-view]',nav).forEach(b=>b.classList.toggle('active',b.dataset.view===view));$('.studio-sidebar').classList.remove('open');if(view==='dashboard')renderDashboard();if(view==='compose')renderCompose();if(view==='content')renderContent();if(view==='series')renderSeriesManager();if(view==='analytics')renderAnalytics()}
   async function getAnalytics(days=analyticsDays){const {data,error}=await sb.rpc('analytics_dashboard',{p_days:days});if(error)throw error;return data||{summary:{},daily:[],top_articles:[],sources:[],devices:[],searches:[],content:{}}}
   function titleForSlug(slug){const a=localArticles.find(x=>x.slug===slug)||bundledArticles.find(x=>x.slug===slug);if(a)return a.title;return slug||'—'}
+  function nextSeriesOrder(id){if(!id)return 1;return Math.max(0,...localArticles.filter(a=>a.series_id===id).map(a=>Number(a.series_order)||0))+1}
 
   async function renderDashboard(){
     content.innerHTML=`<div class="view-head"><div><span class="eyebrow">CONTROL ROOM</span><h1>صباح العمل.</h1><p>نظرة سريعة على النشر والأداء قبل أن تبدأي.</p></div><button class="primary-btn" style="width:auto" id="quickCompose">مادة جديدة <b>+</b></button></div><div class="metric-grid" id="dashMetrics"></div><div class="dashboard-grid"><section class="panel"><div class="panel-head"><h2>الحركة خلال 30 يومًا</h2><span>PAGE VIEWS / VISITORS</span></div><div class="chart-wrap"><canvas id="dashChart"></canvas></div></section><section class="panel"><div class="panel-head"><h2>الأكثر قراءة</h2><span>TOP STORIES</span></div><div class="mini-list" id="dashTop"></div></section></div>`;
@@ -60,13 +79,14 @@
   }
   function metric(label,value,note,wide=false){return `<div class="metric-card ${wide?'wide':''}"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(note)}</small></div>`}
 
-  function renderCompose(article=null){
+  function renderCompose(article=null,presetSeriesId=null){
     editingId=article?.id||null;
-    const englishReady=!!(article?.title_en&&article?.body_en);
+    const englishReady=!!(article?.title_en&&article?.body_en), selectedSeriesId=article?.series_id||presetSeriesId||'', selectedSeriesOrder=article?.series_order||nextSeriesOrder(selectedSeriesId);
     content.innerHTML=`<div class="view-head"><div><span class="eyebrow">EDITOR</span><h1>${article?'تعديل المادة':'مادة جديدة'}</h1><p>اكتبي المادة، أضيفي صورتها، ثم انشريها أو احفظيها كمسودة.</p></div></div>
     <form id="articleForm" class="compose-layout">
       <section class="editor-card">
         <div class="field"><label>نوع المادة</label><div class="type-grid">${['news','report','article','training'].map(t=>`<label class="type-choice"><input type="radio" name="type" value="${t}" ${(article?.type||'news')===t?'checked':''}><span>${typeLabel[t]}</span></label>`).join('')}</div></div>
+        <div class="series-compose-box"><div class="field"><label>هل هذه المادة ضمن سلسلة؟</label><select name="series_id" id="articleSeries"><option value="">لا — مادة مستقلة</option>${localSeries.map(sr=>`<option value="${sr.id}" ${selectedSeriesId===sr.id?'selected':''}>${esc(sr.title)}${sr.status==='draft'?' — مسودة':''}</option>`).join('')}</select></div><div class="field series-order-field" id="seriesOrderField" ${selectedSeriesId?'':'hidden'}><label>ترتيبها داخل السلسلة</label><input name="series_order" id="seriesOrder" type="number" min="1" step="1" value="${selectedSeriesId?selectedSeriesOrder:''}"></div><button type="button" class="inline-manage-series" id="manageSeriesFromCompose">إدارة / إنشاء سلسلة ↗</button></div>
         <div class="field"><label>العنوان العربي</label><textarea class="title-input" name="title" maxlength="240" required placeholder="عنوان المادة…">${esc(article?.title||'')}</textarea></div>
         <div class="field"><label>المقدمة المختصرة <small>اختياري — إذا تركتِها فارغة ستؤخذ من بداية النص</small></label><textarea name="excerpt" rows="3" placeholder="وصف قصير يظهر في البطاقات…">${esc(article?.excerpt||'')}</textarea></div>
         <div class="field"><label>النص الكامل</label><textarea class="body-input" name="body" required placeholder="اكتبي النص كاملًا هنا، وافصلي بين الفقرات بسطر فارغ…">${esc(article?.body||'')}</textarea></div>
@@ -89,6 +109,9 @@
         <div class="hint-box">عند النشر يسجل تاريخ اليوم في السعودية. إذا لم تضيفي صورة، يستخدم الموقع غلاف القسم تلقائيًا.</div>
       </div></aside>
     </form>`;
+    const seriesSelect=$('#articleSeries'),seriesOrderField=$('#seriesOrderField'),seriesOrderInput=$('#seriesOrder');
+    seriesSelect?.addEventListener('change',()=>{const id=seriesSelect.value;seriesOrderField.hidden=!id;if(id&&!seriesOrderInput.value)seriesOrderInput.value=nextSeriesOrder(id)});
+    $('#manageSeriesFromCompose')?.addEventListener('click',()=>render('series'));
     let selectedFile=null, removeExisting=false, objectUrl=null;
     const input=$('#articleImage'),drop=$('#imageDrop'),preview=$('#imagePreview'),remove=$('#removeImage');
     function setPreview(file){
@@ -117,13 +140,54 @@
       let image=removeExisting?null:(existing?.image_url||null);if(file)image=await uploadImage(file);
       const tags=String(fd.get('tags')||'').split(/[،,]/).map(x=>x.trim()).filter(Boolean), tagsEn=String(fd.get('tags_en')||'').split(',').map(x=>x.trim()).filter(Boolean);
       const titleEn=String(fd.get('title_en')||'').trim(),bodyEn=String(fd.get('body_en')||'').trim(),now=new Date().toISOString();
-      const payload={type:fd.get('type'),title,excerpt:String(fd.get('excerpt')||'').trim()||excerptFrom(body),body,image_url:image,place:String(fd.get('place')||'جدة').trim()||'جدة',place_en:String(fd.get('place_en')||'Jeddah').trim()||'Jeddah',author:'دانه بالجهر',tags,featured:fd.get('featured')==='on',status:action==='publish'?'published':'draft',title_en:titleEn||null,excerpt_en:String(fd.get('excerpt_en')||'').trim()||null,body_en:bodyEn||null,tags_en:tagsEn,show_en:fd.get('show_en')==='on'&&!!titleEn&&!!bodyEn};
+      const seriesId=String(fd.get('series_id')||'').trim()||null,seriesOrder=seriesId?(Number(fd.get('series_order'))||nextSeriesOrder(seriesId)):null;
+      const payload={type:fd.get('type'),title,excerpt:String(fd.get('excerpt')||'').trim()||excerptFrom(body),body,image_url:image,place:String(fd.get('place')||'جدة').trim()||'جدة',place_en:String(fd.get('place_en')||'Jeddah').trim()||'Jeddah',author:'دانه بالجهر',tags,featured:fd.get('featured')==='on',status:action==='publish'?'published':'draft',title_en:titleEn||null,excerpt_en:String(fd.get('excerpt_en')||'').trim()||null,body_en:bodyEn||null,tags_en:tagsEn,show_en:fd.get('show_en')==='on'&&!!titleEn&&!!bodyEn,series_id:seriesId,series_order:seriesOrder};
       if(action==='publish'){payload.published_at=existing?.published_at||now;payload.published_date=existing?.published_date||saudiDate()}
       if(editingId){const {error}=await sb.from('cms_articles').update(payload).eq('id',editingId);if(error)throw error}
       else{payload.slug=slugify(title);let {error}=await sb.from('cms_articles').insert(payload);if(error?.code==='23505'){payload.slug=`${payload.slug}-${Date.now().toString(36).slice(-5)}`;({error}=await sb.from('cms_articles').insert(payload))}if(error)throw error}
       await loadLocalArticles();toast(action==='publish'?'تم نشر المادة وظهورها للقراء':'تم حفظ المسودة');render('content');
     }catch(err){toast(`تعذر الحفظ: ${err.message}`)}finally{buttons.forEach(x=>x.disabled=false)}
   }
+
+  function renderSeriesManager(editId=null){
+    const editing=localSeries.find(x=>x.id===editId)||null;
+    content.innerHTML=`<div class="view-head"><div><span class="eyebrow">EDITORIAL COLLECTIONS</span><h1>السلاسل</h1><p>أنشئي أي عدد من السلاسل، ثم اربطي بها الأخبار أو التقارير أو المقالات أو التجارب ورتبي مواد كل سلسلة.</p></div><button class="primary-btn" style="width:auto" id="newSeriesBtn">سلسلة جديدة <b>+</b></button></div>
+    <div class="series-studio-layout">
+      <section class="editor-card series-editor-card">
+        <div class="panel-head"><h2>${editing?'تعديل السلسلة':'إنشاء سلسلة'}</h2><span>${editing?'EDIT SERIES':'NEW SERIES'}</span></div>
+        <form id="seriesForm">
+          <div class="field"><label>عنوان السلسلة</label><input name="title" required value="${esc(editing?.title||'')}" placeholder="مثال: ما لا يراه القارئ"></div>
+          <div class="field"><label>وصف السلسلة <small>يظهر في صفحة السلسلة وبطاقتها</small></label><textarea name="description" rows="4" placeholder="فكرة السلسلة وما الذي يجمع موادها…">${esc(editing?.description||'')}</textarea></div>
+          <details class="english-editor" ${editing?.title_en?'open':''}><summary><span><b>English series</b><small>عنوان ووصف النسخة الإنجليزية</small></span><i>＋</i></summary><div class="english-fields"><div class="field"><label>English title</label><input name="title_en" dir="ltr" value="${esc(editing?.title_en||'')}"></div><div class="field"><label>English description</label><textarea name="description_en" rows="4" dir="ltr">${esc(editing?.description_en||'')}</textarea></div></div></details>
+          <div class="series-settings-grid"><div class="field"><label>الحالة</label><select name="status"><option value="published" ${(editing?.status||'published')==='published'?'selected':''}>منشورة</option><option value="draft" ${editing?.status==='draft'?'selected':''}>مسودة / مخفية</option></select></div><label class="check-card"><input type="checkbox" name="is_ongoing" ${editing?.is_ongoing!==false?'checked':''}><span><b>سلسلة مستمرة</b><small>يمكن إضافة مواد جديدة لاحقًا</small></span></label><label class="check-card"><input type="checkbox" name="featured" ${editing?.featured?'checked':''}><span><b>سلسلة مميزة</b><small>تظهر أولًا في واجهة القراء</small></span></label></div>
+          <div class="field"><label>غلاف السلسلة <small>اختياري</small></label><div class="series-cover-picker">${editing?.cover_url?`<img src="${esc(editing.cover_url)}" alt="">`:'<span>بدون صورة — ستظهر الهوية التحريرية الافتراضية</span>'}<input id="seriesCover" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div></div>
+          <div class="publish-actions horizontal"><button class="publish-now" type="submit">${editing?'حفظ التعديلات':'إنشاء السلسلة'} ↗</button>${editing?'<button class="save-draft" type="button" id="cancelSeriesEdit">إلغاء</button>':''}</div>
+        </form>
+      </section>
+      <section class="series-admin-list"><div class="panel-head"><h2>السلاسل الحالية</h2><span>${localSeries.length} SERIES</span></div><div id="seriesAdminCards">${localSeries.map(seriesAdminCard).join('')||'<div class="empty-state">لا توجد سلاسل بعد.</div>'}</div></section>
+    </div>`;
+    $('#newSeriesBtn').onclick=()=>renderSeriesManager();$('#cancelSeriesEdit')?.addEventListener('click',()=>renderSeriesManager());
+    $('#seriesForm').addEventListener('submit',e=>saveSeries(e,editing));
+    $$('[data-series-edit]').forEach(b=>b.onclick=()=>renderSeriesManager(b.dataset.seriesEdit));
+    $$('[data-series-delete]').forEach(b=>b.onclick=()=>deleteSeries(b.dataset.seriesDelete));
+    $$('[data-series-add]').forEach(b=>b.onclick=()=>renderCompose(null,b.dataset.seriesAdd));
+    $$('[data-series-article-edit]').forEach(b=>b.onclick=()=>renderCompose(localArticles.find(a=>a.id===b.dataset.seriesArticleEdit)));
+    $$('[data-series-move]').forEach(b=>b.onclick=()=>moveSeriesArticle(b.dataset.seriesId,b.dataset.articleId,b.dataset.seriesMove));
+  }
+  function seriesAdminCard(sr){
+    const members=localArticles.filter(a=>a.series_id===sr.id).sort((a,b)=>(Number(a.series_order)||9999)-(Number(b.series_order)||9999));
+    return `<article class="series-admin-card"><header><div><span class="status-pill ${sr.status==='draft'?'draft':''}">${sr.status==='published'?'منشورة':'مسودة'}</span><h3>${esc(sr.title)}</h3><p>${esc(sr.description||'بدون وصف')}</p></div><div class="series-admin-actions"><button data-series-edit="${sr.id}">تعديل</button><button data-series-delete="${sr.id}">حذف</button></div></header><div class="series-admin-meta"><span>${members.length} مواد</span><span>${sr.is_ongoing!==false?'مستمرة':'مكتملة'}</span>${sr.featured?'<span>مميزة ★</span>':''}</div><div class="series-members">${members.map((a,i)=>`<div class="series-member"><b>${String(i+1).padStart(2,'0')}</b><span title="${esc(a.title)}">${esc(a.title)}</span><div><button data-series-move="up" data-series-id="${sr.id}" data-article-id="${a.id}" ${i===0?'disabled':''}>↑</button><button data-series-move="down" data-series-id="${sr.id}" data-article-id="${a.id}" ${i===members.length-1?'disabled':''}>↓</button><button data-series-article-edit="${a.id}">تعديل</button></div></div>`).join('')||'<div class="empty-state compact">لا توجد مواد داخل هذه السلسلة بعد.</div>'}</div><button class="add-to-series" data-series-add="${sr.id}">إضافة مادة إلى هذه السلسلة +</button></article>`
+  }
+  async function saveSeries(e,existing){
+    e.preventDefault();const form=e.currentTarget,fd=new FormData(form),title=String(fd.get('title')||'').trim();if(!title){toast('عنوان السلسلة مطلوب');return}
+    const submit=form.querySelector('button[type="submit"]');submit.disabled=true;
+    try{let cover=existing?.cover_url||null;const file=$('#seriesCover')?.files?.[0];if(file)cover=await uploadImage(file);const payload={title,description:String(fd.get('description')||'').trim(),title_en:String(fd.get('title_en')||'').trim()||null,description_en:String(fd.get('description_en')||'').trim()||null,cover_url:cover,status:fd.get('status')||'published',is_ongoing:fd.get('is_ongoing')==='on',featured:fd.get('featured')==='on'};
+      if(existing){const {error}=await sb.from('cms_series').update(payload).eq('id',existing.id);if(error)throw error}else{payload.slug=`series-${Date.now().toString(36)}`;let {error}=await sb.from('cms_series').insert(payload);if(error)throw error}
+      await loadLocalSeries();toast(existing?'تم تحديث السلسلة':'تم إنشاء السلسلة');renderSeriesManager();
+    }catch(err){toast(`تعذر حفظ السلسلة: ${err.message}`)}finally{submit.disabled=false}
+  }
+  async function deleteSeries(id){const sr=localSeries.find(x=>x.id===id);if(!sr||!confirm(`حذف سلسلة «${sr.title}»؟ المواد نفسها لن تُحذف، وستتحول إلى مواد مستقلة.`))return;const {error}=await sb.from('cms_series').delete().eq('id',id);if(error){toast(error.message);return}await Promise.all([loadLocalSeries(),loadLocalArticles()]);renderSeriesManager();toast('تم حذف السلسلة مع إبقاء موادها')}
+  async function moveSeriesArticle(seriesId,articleId,direction){const members=localArticles.filter(a=>a.series_id===seriesId).sort((a,b)=>(Number(a.series_order)||9999)-(Number(b.series_order)||9999)),idx=members.findIndex(a=>a.id===articleId),other=direction==='up'?members[idx-1]:members[idx+1];if(idx<0||!other)return;const cur=members[idx],curOrder=Number(cur.series_order)||idx+1,otherOrder=Number(other.series_order)||(direction==='up'?idx:idx+2);const {error:e1}=await sb.from('cms_articles').update({series_order:otherOrder}).eq('id',cur.id);if(e1){toast(e1.message);return}const {error:e2}=await sb.from('cms_articles').update({series_order:curOrder}).eq('id',other.id);if(e2){toast(e2.message);return}await loadLocalArticles();renderSeriesManager();}
 
   function renderContent(){content.innerHTML=`<div class="view-head"><div><span class="eyebrow">CONTENT LIBRARY</span><h1>المواد</h1><p>أرشيفك الصحفي كاملًا: المواد الحالية والجديدة، المنشورة والمسودات.</p></div><button class="primary-btn" style="width:auto" id="newFromContent">مادة جديدة <b>+</b></button></div><div class="content-toolbar"><input id="contentSearch" placeholder="ابحثي في العناوين…"><select id="contentFilter"><option value="all">الكل</option><option value="published">منشور</option><option value="draft">مسودة</option><option value="news">أخبار</option><option value="report">تقارير</option><option value="article">مقالات</option><option value="training">تجربة</option></select></div><div class="content-table" id="contentTable"></div>`;$('#newFromContent').onclick=()=>render('compose');$('#contentSearch').addEventListener('input',renderContentRows);$('#contentFilter').addEventListener('change',renderContentRows);renderContentRows()}
   function renderContentRows(){const root=$('#contentTable');if(!root)return;const q=$('#contentSearch').value.trim().toLowerCase(),f=$('#contentFilter').value;let rows=localArticles.filter(a=>(!q||a.title.toLowerCase().includes(q))&&(f==='all'||a.status===f||a.type===f));root.innerHTML=`<div class="content-row head"><span>الصورة</span><span>العنوان</span><span>النوع</span><span>الحالة</span><span>التاريخ</span><span>إدارة</span></div>`+(rows.map(a=>`<div class="content-row"><img class="content-thumb" src="${esc(a.image_url||fallback[a.type])}" alt=""><div class="content-title"><strong>${esc(a.title)}</strong><small>${esc(a.slug)}</small></div><span>${typeLabel[a.type]||a.type}</span><span class="status-pill ${a.status==='draft'?'draft':''}">${a.status==='published'?'منشور':'مسودة'}</span><span>${fmtDate(a.published_at||a.created_at)}</span><div class="row-actions"><button data-edit="${a.id}">تعديل</button><button data-delete="${a.id}">حذف</button></div></div>`).join('')||'<div class="empty-state">لا توجد مواد بعد.</div>');$$('[data-edit]',root).forEach(b=>b.onclick=()=>renderCompose(localArticles.find(a=>a.id===b.dataset.edit)));$$('[data-delete]',root).forEach(b=>b.onclick=()=>deleteArticle(b.dataset.delete))}
