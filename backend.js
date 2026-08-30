@@ -1,9 +1,12 @@
 (() => {
   'use strict';
   const PROJECT_URL = 'https://vffsndkoaswcnnlzpvuu.supabase.co';
-  const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYXNlIiwicmVmIjoidmZmc25ka29hc3djbm5senB2dXUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzkwNjEzMSwiZXhwIjoyMTAzNDgyMTMxfQ.SFssdBRp_XAlezCsJqGQ8xLfs8iu3vmaSBivAXfAWyE';
+  const PUBLISHABLE_KEY = 'sb_publishable_VdtvaVY0ph621QwYpFnjpw_8ukceobx';
   const API = `${PROJECT_URL}/rest/v1`;
-  const headers = {apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`};
+  // Supabase publishable keys are sent as the apikey header. Do not use the old
+  // legacy anon JWT as a Bearer token; the project now authenticates public REST
+  // traffic with the publishable key.
+  const headers = {apikey: PUBLISHABLE_KEY};
   const fallback = {
     news:'assets/covers/default-news.svg', report:'assets/covers/default-report.svg', article:'assets/covers/default-article.svg', training:'assets/covers/default-training.svg'
   };
@@ -65,5 +68,5 @@
   const seenSession='dana-session-seen';
   if(!sessionStorage.getItem(seenSession)){sessionStorage.setItem(seenSession,'1');event('session_start');}
   event('page_view');
-  window.DanaBackend={PROJECT_URL,ANON_KEY,loadPublishedArticles,loadPublishedSeries,event,articleView:(s)=>event('article_view',s),search:(q)=>event('search',null,{query:q}),share:(s)=>event('share',s),save:(s)=>event('save',s),leave:(s,m={})=>event('article_leave',s,m)};
+  window.DanaBackend={PROJECT_URL,PUBLISHABLE_KEY,loadPublishedArticles,loadPublishedSeries,event,articleView:(s)=>event('article_view',s),search:(q)=>event('search',null,{query:q}),share:(s)=>event('share',s),save:(s)=>event('save',s),leave:(s,m={})=>event('article_leave',s,m)};
 })();

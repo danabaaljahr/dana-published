@@ -39,3 +39,6 @@
 - Uploaded series/article media is rendered from Supabase in reader-facing cards/pages.
 - Published/draft state from the CMS remains authoritative when Supabase responds.
 - Final automated audit: 359/359 static checks passed, plus content, JavaScript, CSS, and live Supabase-state verification.
+
+
+V17: fixed Supabase public REST authentication to use the project's current publishable key (not the legacy anon JWT), preventing false Public check 401 errors and allowing live CMS/image data to reach reader pages.

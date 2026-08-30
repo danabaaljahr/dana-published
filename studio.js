@@ -3,7 +3,6 @@
   const URL = 'https://vffsndkoaswcnnlzpvuu.supabase.co';
   const KEY = 'sb_publishable_VdtvaVY0ph621QwYpFnjpw_8ukceobx';
   const OWNER = 'danahfahad.mb@gmail.com';
-  const PUBLIC_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYXNlIiwicmVmIjoidmZmc25ka29hc3djbm5senB2dXUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzkwNjEzMSwiZXhwIjoyMTAzNDgyMTMxfQ.SFssdBRp_XAlezCsJqGQ8xLfs8iu3vmaSBivAXfAWyE';
   const sb = window.supabase.createClient(URL, KEY, {auth:{persistSession:true,detectSessionInUrl:true}});
   const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
   const login=$('#studioLogin'), app=$('#studioApp'), content=$('#studioContent'), nav=$('#studioNav'), sectionLabel=$('#currentSection');
@@ -23,7 +22,7 @@
   function slugify(title){const latin=String(title).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,70);return latin || `story-${Date.now().toString(36)}`}
   function excerptFrom(body){return String(body||'').replace(/\s+/g,' ').trim().slice(0,190)}
   function saudiDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
-  async function publicRest(table,params){const r=await fetch(`${URL}/rest/v1/${table}?${params}`,{cache:'no-store',headers:{apikey:PUBLIC_ANON,Authorization:`Bearer ${PUBLIC_ANON}`}});if(!r.ok)throw new Error(`Public check ${r.status}`);return r.json()}
+  async function publicRest(table,params){const r=await fetch(`${URL}/rest/v1/${table}?${params}`,{cache:'no-store',headers:{apikey:KEY,'Cache-Control':'no-cache'}});if(!r.ok){const detail=await r.text().catch(()=>''),err=new Error(`Public check ${r.status}${detail?` — ${detail.slice(0,120)}`:''}`);err.status=r.status;throw err}return r.json()}
   async function verifyPublicArticle(slug){const rows=await publicRest('cms_articles',`slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=slug,status,image_url&limit=1`);if(!rows?.[0])throw new Error('المادة محفوظة، لكن فحص وصول القراء لم ينجح');return rows[0]}
   async function verifyPublicSeries(slug){const rows=await publicRest('cms_series',`slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=slug,status,cover_url&limit=1`);if(!rows?.[0])throw new Error('السلسلة محفوظة، لكن فحص وصول القراء لم ينجح');return rows[0]}
   async function isAdmin(){const {data}=await sb.from('admin_users').select('user_id').maybeSingle();return !!data}
@@ -157,8 +156,13 @@
       else{payload.slug=slugify(title);let result=await sb.from('cms_articles').insert(payload).select('id,slug,status,image_url,published_at,published_date,updated_at').single();if(result.error?.code==='23505'){payload.slug=`${payload.slug}-${Date.now().toString(36).slice(-5)}`;result=await sb.from('cms_articles').insert(payload).select('id,slug,status,image_url,published_at,published_date,updated_at').single()}if(result.error)throw result.error;savedRow=result.data}
       if(action==='publish'&&(!savedRow||savedRow.status!=='published'))throw new Error('لم يتم تأكيد حالة النشر في قاعدة البيانات');
       if(action==='publish'&&file&&!savedRow?.image_url)throw new Error('تم رفع الصورة لكن لم يُحفظ رابطها مع المادة');
-      if(action==='publish'){const publicRow=await verifyPublicArticle(savedRow.slug);if(file&&!publicRow.image_url)throw new Error('المادة متاحة للقراء لكن رابط الصورة غير ظاهر للعامة')}
-      await loadLocalArticles();toast(action==='publish'?'تم النشر والتحقق من وصول المادة للقراء':'تم حفظ المسودة');render('content');
+      let publicVerified=true,verifyWarning='';
+      if(action==='publish'){
+        try{const publicRow=await verifyPublicArticle(savedRow.slug);if(file&&!publicRow.image_url)throw new Error('رابط الصورة غير ظاهر للعامة بعد الحفظ')}
+        catch(vErr){publicVerified=false;verifyWarning=vErr.message||'تعذر فحص واجهة القراء'}
+      }
+      await loadLocalArticles();
+      toast(action==='publish'?(publicVerified?'تم النشر وظهور المادة للقراء':`تم النشر. تعذر فحص واجهة القراء مؤقتًا: ${verifyWarning}`):'تم حفظ المسودة');render('content');
     }catch(err){toast(`تعذر الحفظ: ${err.message}`)}finally{buttons.forEach(x=>x.disabled=false)}
   }
 
@@ -196,8 +200,13 @@
     const submit=form.querySelector('button[type="submit"]');submit.disabled=true;
     try{let cover=existing?.cover_url||null;const file=$('#seriesCover')?.files?.[0];if(file)cover=await uploadImage(file);const payload={title,description:String(fd.get('description')||'').trim(),title_en:String(fd.get('title_en')||'').trim()||null,description_en:String(fd.get('description_en')||'').trim()||null,cover_url:cover,status:fd.get('status')||'published',is_ongoing:fd.get('is_ongoing')==='on',featured:fd.get('featured')==='on'};
       let savedSeries=null;if(existing){const {data,error}=await sb.from('cms_series').update(payload).eq('id',existing.id).select('id,slug,status,cover_url,updated_at').single();if(error)throw error;savedSeries=data}else{payload.slug=`series-${Date.now().toString(36)}`;let {data,error}=await sb.from('cms_series').insert(payload).select('id,slug,status,cover_url,updated_at').single();if(error)throw error;savedSeries=data}
-      if(savedSeries?.status==='published'){const publicSeries=await verifyPublicSeries(savedSeries.slug);if(file&&!publicSeries.cover_url)throw new Error('السلسلة متاحة للقراء لكن رابط الغلاف غير ظاهر للعامة')}
-      await loadLocalSeries();toast(existing?'تم تحديث السلسلة والتحقق منها':'تم إنشاء السلسلة والتحقق منها');renderSeriesManager();
+      let publicVerified=true,verifyWarning='';
+      if(savedSeries?.status==='published'){
+        try{const publicSeries=await verifyPublicSeries(savedSeries.slug);if(file&&!publicSeries.cover_url)throw new Error('رابط الغلاف غير ظاهر للعامة بعد الحفظ')}
+        catch(vErr){publicVerified=false;verifyWarning=vErr.message||'تعذر فحص واجهة القراء'}
+      }
+      await loadLocalSeries();renderSeriesManager();
+      toast(publicVerified?(existing?'تم تحديث السلسلة وظهورها للقراء':'تم إنشاء السلسلة وظهورها للقراء'):`تم حفظ السلسلة. تعذر فحص واجهة القراء مؤقتًا: ${verifyWarning}`);
     }catch(err){toast(`تعذر حفظ السلسلة: ${err.message}`)}finally{submit.disabled=false}
   }
   async function deleteSeries(id){const sr=localSeries.find(x=>x.id===id);if(!sr||!confirm(`حذف سلسلة «${sr.title}»؟ المواد نفسها لن تُحذف، وستتحول إلى مواد مستقلة.`))return;const {error}=await sb.from('cms_series').delete().eq('id',id);if(error){toast(error.message);return}await Promise.all([loadLocalSeries(),loadLocalArticles()]);renderSeriesManager();toast('تم حذف السلسلة مع إبقاء موادها')}
