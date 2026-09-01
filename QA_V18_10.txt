@@ -1,0 +1,36 @@
+DANA PUBLISHED — QA V18.10
+Date: 2026-09-01 UTC
+
+RESULT: PASS — FREE AUTOMATIC EDITOR READY FOR ONE-TIME KEY CONNECTION
+
+Free editor
+- Paid OpenAI provider: DISABLED
+- Free provider: Gemini 2.5 Flash-Lite
+- Gemini API key: encrypted server-side
+- Key validation before saving: ENABLED
+- Billing card required: NO for a Free Tier project
+- Free quota behavior: pause/retry, never charge
+
+Editorial safeguards
+- Automatic publication: Saudi-related news only
+- Accepted tiers: worth / important / urgent
+- International news: remains in Radar for manual review
+- Dana manual news: style authority
+- Source article: fact authority
+- Names, dates, numbers, and claims: verified before publication
+- Old backlog after key connection: excluded
+
+Production
+- news-auto-editor Edge Function: version 5 ACTIVE
+- Scheduler: every 30 seconds ACTIVE
+- Current provider setting: Gemini
+- Current Gemini key state: waiting for one-time connection in Studio
+
+Frontend
+- Studio free-provider copy and controls: PASS
+- JavaScript syntax: see final package validation
+- Cache version: V18.10
+
+Other free delivery services
+- Browser push queue: ACTIVE
+- Gmail newsletter queue: ACTIVE; requires a free Gmail App Password once
