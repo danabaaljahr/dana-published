@@ -10,12 +10,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="studio.css?v=20260830-v17" />
+  <link rel="stylesheet" href="studio.css?v=20260901-v18-2" />
   <script defer src="articles.js"></script>
-  <script defer src="translations-en.js?v=20260830-v17"></script>
-  <script defer src="series-data.js?v=20260830-v17"></script>
+  <script defer src="translations-en.js?v=20260901-v18"></script>
+  <script defer src="series-data.js?v=20260901-v18"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="studio.js?v=20260830-v17"></script>
+  <script defer src="studio.js?v=20260901-v18-2"></script>
 </head>
 <body>
   <div class="studio-login" id="studioLogin">
@@ -25,7 +25,7 @@
       <span class="eyebrow">OWNER ACCESS ONLY</span>
       <h1>دخول لوحة الإدارة</h1>
       <p>سيُرسل رابط دخول آمن إلى البريد المعتمد فقط. لا توجد كلمة مرور محفوظة داخل الموقع.</p>
-      <label>البريد المعتمد<input id="loginEmail" value="Danahfahad.mb@gmail.com" readonly /></label>
+      <label>البريد المعتمد<input id="loginEmail" value="danahfahad.mb@gmail.com" readonly /></label>
       <button id="sendMagicLink" class="primary-btn" type="button"><span>إرسال رابط الدخول</span><b>↗</b></button>
       <div class="login-status" id="loginStatus" aria-live="polite"></div>
       <small>هذه الصفحة غير مرتبطة بواجهة القراء، والوصول إلى بياناتها محمي أيضًا من قاعدة البيانات.</small>
@@ -34,19 +34,23 @@
 
   <div class="studio-app" id="studioApp" hidden>
     <aside class="studio-sidebar">
-      <div class="studio-brand"><img src="assets/brand/dana-mark.png" alt=""><div><strong>DANA STUDIO</strong><span>Editorial Control Room</span></div></div>
+      <div class="studio-brand"><img src="assets/brand/dana-mark.png" alt=""><div><strong>DANA STUDIO</strong><span>Editorial Newsroom · Live Radar</span></div></div>
       <nav id="studioNav">
-        <button class="active" data-view="dashboard"><i>01</i><span>نظرة عامة</span></button>
-        <button data-view="compose"><i>02</i><span>مادة جديدة</span></button>
-        <button data-view="content"><i>03</i><span>المواد</span></button>
-        <button data-view="series"><i>04</i><span>السلاسل</span></button>
-        <button data-view="analytics"><i>05</i><span>التحليلات</span></button>
+        <button class="active" data-view="dashboard"><i>01</i><span>غرفة التحرير</span></button>
+        <button data-view="radar"><i>02</i><span>رادار الأخبار</span><em id="radarNavCount"></em></button>
+        <button data-view="compose"><i>03</i><span>مادة جديدة</span></button>
+        <button data-view="content"><i>04</i><span>المواد</span></button>
+        <button data-view="series"><i>05</i><span>السلاسل</span></button>
+        <button data-view="sections"><i>06</i><span>الأقسام</span></button>
+        <button data-view="sources"><i>07</i><span>المصادر</span></button>
+        <button data-view="analytics"><i>08</i><span>التحليلات</span></button>
+        <button data-view="settings"><i>09</i><span>الإعدادات</span></button>
       </nav>
       <div class="sidebar-bottom"><a href="./" target="_blank" rel="noopener">فتح واجهة القراء ↗</a><button id="signOut" type="button">تسجيل الخروج</button></div>
     </aside>
 
     <div class="studio-main">
-      <header class="studio-topbar"><div><button class="mobile-nav" id="mobileNav" type="button">☰</button><span id="currentSection">نظرة عامة</span><small id="todayLabel"></small></div><div class="top-actions"><span class="live-dot"><i></i> LIVE DATA</span><button id="refreshData" type="button">تحديث ↻</button></div></header>
+      <header class="studio-topbar"><div><button class="mobile-nav" id="mobileNav" type="button">☰</button><span id="currentSection">غرفة التحرير</span><small id="todayLabel"></small></div><div class="top-actions"><span class="live-dot"><i></i> LIVE DATA</span><button id="refreshData" type="button">تحديث ↻</button></div></header>
       <main id="studioContent"></main>
     </div>
   </div>

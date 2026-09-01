@@ -1,0 +1,25 @@
+DANA V18.2 — LOCAL QA
+
+Checks: 165
+PASS: 165
+FAIL: 0
+
+LIVE BACKEND (verified separately):
+- 39 published articles
+- 39/39 English-ready
+- Radar cron: every 2 minutes
+- RSS endpoint returns HTTP 200
+- Newsletter subscribe endpoint returns HTTP 200
+- Gmail SMTP path deployed; final sending requires one-time Gmail App Password in Studio
+
+FEATURES:
+- Dynamic newsroom homepage + sections
+- Radar + automatic prioritization
+- Automatic English translation
+- Newsletter + Push
+- Direct email + WhatsApp
+- SEO/OG/JSON-LD/canonical
+- RSS + sitemap + robots
+- Editorial policy + privacy
+- Related reading + update metadata
+- Accessibility polish

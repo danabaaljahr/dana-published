@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+Disallow: /studio.html
+Sitemap: https://danabaaljahr.github.io/dana-published/sitemap.xml
