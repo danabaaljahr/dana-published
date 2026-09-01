@@ -1,0 +1,20 @@
+Dana Published V18.6 QA
+======================
+Total checks: 379
+Passed: 379
+Failed: 0
+
+Verified:
+- All JavaScript syntax valid.
+- Article PDF export no longer calls browser print/window.print.
+- PDF downloads directly from the article button.
+- PDF renderer has an independent Dana-branded layout: first-page logo, series/title/deck, article metadata, topic chips, body, QR provenance block, black identity footer, and page numbering.
+- Later PDF pages do not repeat the website header.
+- PDF binary writer was smoke-tested by creating a JPEG-backed PDF and rendering it successfully with the PDF verification renderer.
+- Homepage lead skips title-based SVG cover art so the headline is not visually duplicated.
+- If a real uploaded photo exists it is used; otherwise a navy Dana identity panel is shown.
+- Lead headline and visual height are reduced.
+- Latest-stories horizontal carousel remains enabled on desktop and swipeable on mobile.
+- Duplicate footer navigation remains removed; the floating back-to-top control remains.
+- Service worker remains push-only with no UI caching.
+- Local HTML asset references resolve.
