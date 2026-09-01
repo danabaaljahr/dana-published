@@ -1,12 +1,18 @@
-# Dana Published V18.7
+# Dana Published V18.9
 
-Saudi-first newsroom update.
+إصدار إصلاح التشغيل الآلي والتنبيهات.
 
-- Reader LIVE status links to `news.html?live=today` and shows news published today in Saudi time.
-- LIVE page refreshes automatically while open.
-- Radar database schedule is now every 30 seconds.
-- Saudi-origin and Saudi-related radar items receive a priority boost.
-- `worth`, `important`, and `urgent` items are marked as auto-publish candidates for the future style-based auto-editor.
-- Studio shows auto-publish eligibility and the new 30-second radar cadence.
+- رادار الأخبار يفحص المصادر النشطة كل 30 ثانية ويعطي أولوية واضحة للأخبار السعودية.
+- المحرر الآلي يعالج فئات «يستحق التغطية / مهم / مهم جدًا» بعد ربط OpenAI API من إعدادات Studio.
+- الصياغة تعتمد على أخبار دانه المنشورة يدويًا، مع تقديم نماذج القسم نفسه ثم أحدث النماذج الأخرى.
+- قفل للحقائق والأسماء والأرقام والتواريخ قبل السماح بالنشر.
+- إشعارات المتصفح تدخل طابور إرسال تلقائي بعد كل نشر جديد.
+- النشرة البريدية تدخل طابور إرسال تلقائي بعد كل نشر جديد.
+- صفحة الإعدادات تعرض بوضوح ما يعمل وما يحتاج ربطًا مرة واحدة، بدل إظهار التشغيل قبل اكتمال الإعداد.
+- إذا كان إذن التنبيهات محظورًا من المتصفح، تظهر للقارئ طريقة إصلاحه بدل رسالة عامة.
 
-Important: automatic rewriting/publishing in Dana's writing style still requires a connected language-model API. The candidate policy is active, but no item is auto-written or auto-published without that model connection.
+الإعداد لمرة واحدة من `studio.html`:
+
+1. ربط OpenAI API لتشغيل الصياغة والنشر الآلي.
+2. ربط Gmail App Password واختبار البريد لتشغيل رسائل النشرة.
+3. القارئ يضغط «نبّهني عند النشر» ويسمح بالإشعارات من المتصفح.

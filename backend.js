@@ -69,7 +69,9 @@
   }
   async function enablePush(topics=['all']){
     if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))throw new Error('الإشعارات غير مدعومة في هذا المتصفح.');
-    const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error('لم يتم السماح بالإشعارات.');
+    const lang=document.documentElement.lang||'ar';
+    if(Notification.permission==='denied')throw new Error(lang==='en'?'Notifications are blocked in your browser settings. Allow notifications for this site, then reload the page.':'التنبيهات محظورة من إعدادات المتصفح. افتحي إعدادات الموقع من الرمز بجانب الرابط، اختاري «الإشعارات: سماح»، ثم أعيدي تحميل الصفحة.');
+    const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error(lang==='en'?'Notification permission was not granted. You can still subscribe by email below.':'لم يتم تفعيل إذن التنبيهات. تقدرين تستخدمين الاشتراك البريدي من أسفل الصفحة.');
     const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
     if(!sub){const cfg=await edge('reader-push',{action:'config'});sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToUint8(cfg.publicKey)})}
     const j=sub.toJSON();await edge('reader-push',{action:'subscribe',subscription:{endpoint:sub.endpoint,keys:j.keys},topics,language:document.documentElement.lang||'ar'});localStorage.setItem('dana-push-enabled','1');return true;

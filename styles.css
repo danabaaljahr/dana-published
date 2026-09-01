@@ -311,7 +311,7 @@ html[lang="ar"] .series-hero h1{letter-spacing:0;line-height:1.05}
 @media(max-width:760px){.editorial-status>a.status-live{font-size:.61rem;padding:.4rem .58rem}.live-today-status{font-size:.68rem;max-width:100%;flex-wrap:wrap}}
 
 
-/* V18.8 — language fidelity + unified controls */
+/* V18.9 — language fidelity + unified controls */
 :root{--control-fs:.78rem;--control-h:2.85rem}
 .primary-nav a,.utility,.search-button,.ribbon-link,.ribbon-tools button,.btn,.footer-direct a,.newsletter-row button,.footer-top-button,.policy-links a,.article-tools button{font-size:var(--control-fs)!important}
 .header-actions>button,.utility,.search-button{min-height:var(--control-h)}

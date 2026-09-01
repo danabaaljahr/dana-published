@@ -1,0 +1,39 @@
+DANA PUBLISHED — QA V18.9
+Date: 2026-09-01 UTC
+
+RESULT: PASS WITH TWO REQUIRED ONE-TIME CONNECTIONS
+
+Frontend package
+- JavaScript syntax: PASS (9/9 files)
+- Local HTML asset references: PASS (13/13 pages)
+- Service worker/cache version: PASS (V18.9)
+- Studio stylesheet cache version: PASS (V18.9)
+- Blocked browser-notification guidance: PASS (Arabic + English)
+- Publish action resets automatic email and push queues: PASS
+
+Production automation
+- News radar schedule: ACTIVE, every 30 seconds
+- Automatic editor schedule: ACTIVE, every 30 seconds
+- Email queue schedule: ACTIVE, every minute
+- Push queue schedule: ACTIVE, every minute
+- Latest calls for radar, editor, email, and push: HTTP 200
+- Automatic editor function: version 3
+- Reader push function: version 2
+
+Editorial behavior
+- Manual Dana news is used as the style authority.
+- Same-section manual news is prioritized, followed by recent manual news.
+- Source material remains the fact authority.
+- Names, dates, and numbers are checked before automatic publication.
+- Automatic articles are excluded from the style reference set.
+
+Required once in Studio
+1. Add an OpenAI API key to start automatic rewriting and publication.
+2. Add a Gmail App Password, then send one test email to enable automatic newsletter delivery.
+3. Each reader must allow notifications in the browser for web push delivery.
+
+Current live state at final verification
+- Radar is collecting news and the queues are running.
+- Automatic publication is waiting for the OpenAI API connection.
+- Email delivery is waiting for the sender connection.
+- There are currently no active email or browser-push subscribers.
