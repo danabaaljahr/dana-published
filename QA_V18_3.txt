@@ -1,0 +1,17 @@
+Dana Published V18.3 QA
+
+[PASS] PDF export button
+[PASS] Exact article canonical QR
+[PASS] Print brand header
+[PASS] Repeated print provenance footer
+[PASS] Print watermark
+[PASS] Copyright text
+[PASS] DeepL recommended
+[PASS] DeepL priority server already supported
+[PASS] Version 18.3 refs
+
+Notes:
+- PDF export uses the browser print-to-PDF flow so page breaking remains high quality and selectable/searchable.
+- Every exported article includes a repeated identity header, provenance footer, visible canonical URL, copyright line, watermark, and QR pointing to the exact original article URL.
+- QR rendering is served by the deployed Supabase Edge Function qr-code.
+- DeepL remains the preferred provider; a DeepL API key is still required once to activate it.

@@ -25,3 +25,11 @@
 - Public: https://danabaaljahr.github.io/dana-published/
 - Studio: https://danabaaljahr.github.io/dana-published/studio.html
 - RSS: https://vffsndkoaswcnnlzpvuu.supabase.co/functions/v1/public-feed
+
+
+## V18.3 — PDF provenance + DeepL preference
+- Added branded PDF export for every individual editorial material.
+- Repeating Dana Baljher identity header/footer on printed PDF pages.
+- QR code points to the exact canonical story URL, not only the homepage.
+- Visible source URL, copyright notice and subtle watermark inside exported PDFs.
+- DeepL marked as the recommended translation provider and remains first-priority when its API key is connected.

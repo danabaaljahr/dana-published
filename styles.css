@@ -228,3 +228,30 @@ html[lang="ar"] .series-hero h1{letter-spacing:0;line-height:1.05}
 :where(a,button,input,select,textarea,summary):focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:.25rem}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 @media(max-width:760px){.newsroom-edition .shell{overflow-x:auto;white-space:nowrap}.newsroom-edition b{margin-inline-start:.4rem}.article-related-grid{grid-template-columns:1fr}.article-related{padding-block:3rem}.article-follow{display:grid}.article-follow .btn{width:100%}.article-source{grid-template-columns:1fr}}
+
+/* V18.3 — branded PDF provenance */
+.print-brand-top,.print-provenance,.print-watermark{display:none}
+@media print{
+  @page{size:A4;margin:24mm 17mm 27mm}
+  html,body{background:#fff!important;color:#111!important;font-size:11.25pt!important}
+  body:before{display:none!important}
+  .site-header,.newsroom-edition-bar,.ticker,.reading-dock,.article-navlinks,.article-tools,.article-tags,.article-related,.article-follow,.article-prevnext,.site-footer,.page-progress,.toast,.newsletter-band,.newsroom-sections-nav{display:none!important}
+  .article-page,.article-header,.article-layout,.article-body{display:block!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;background:#fff!important}
+  .article-header{padding-top:8mm!important;padding-bottom:8mm!important;border-bottom:1px solid #b8b8b8!important;break-after:avoid-page}
+  .article-title h1{font-size:25pt!important;line-height:1.25!important;margin:4mm 0!important}
+  .article-title p{font-size:11.5pt!important;line-height:1.7!important;max-width:none!important}
+  .article-header dl{margin-top:5mm!important;display:flex!important;gap:7mm!important;flex-wrap:wrap!important}
+  .article-cover{margin:7mm 0!important;break-inside:avoid}
+  .article-cover img{width:100%!important;max-height:125mm!important;object-fit:cover!important}
+  .article-body{font-size:11.25pt!important;line-height:1.9!important;text-align:justify!important}
+  .article-body p{orphans:3;widows:3;margin:0 0 5mm!important}
+  .article-source,.inline-stats,.inline-benefits{break-inside:avoid-page!important}
+  a{color:#111!important;text-decoration:none!important}
+  .print-brand-top{display:flex!important;position:fixed;top:-17mm;left:0;right:0;height:11mm;align-items:center;justify-content:space-between;border-bottom:.35mm solid #111;font-size:8.2pt;letter-spacing:.02em;z-index:9999;background:#fff}
+  .print-brand-top b{font-size:10pt;letter-spacing:.08em}.print-brand-top span{opacity:.65}
+  .print-provenance{display:flex!important;position:fixed;bottom:-21mm;left:0;right:0;height:18mm;align-items:center;justify-content:space-between;border-top:.35mm solid #111;background:#fff;z-index:9999;gap:4mm}
+  .print-provenance-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:.7mm;font-size:7.2pt;line-height:1.25}
+  .print-provenance-copy strong{font-size:8pt}.print-provenance-copy span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:ltr;text-align:left}.print-provenance-copy small{opacity:.65}
+  .print-provenance img{width:15mm!important;height:15mm!important;object-fit:contain!important;flex:0 0 15mm}
+  .print-watermark{display:block!important;position:fixed;z-index:-1;left:50%;top:48%;transform:translate(-50%,-50%) rotate(-28deg);font-size:44pt;font-weight:800;letter-spacing:.08em;white-space:nowrap;color:rgba(0,0,0,.035)!important}
+}
