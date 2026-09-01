@@ -1,0 +1,26 @@
+V18.7 QA
+==============================
+[PASS] LIVE links to today news
+[PASS] Saudi timezone day helper
+[PASS] Live page title
+[PASS] Live page auto refresh
+[PASS] Live status styling
+[PASS] Studio 30 second wording
+[PASS] Studio Saudi priority wording
+[PASS] Studio auto-publish badge
+[PASS] Index app version 18.7
+[PASS] Index CSS version 18.7
+[PASS] 404.html app 18.7
+[PASS] series.html app 18.7
+[PASS] data.html app 18.7
+[PASS] index.html app 18.7
+[PASS] essays.html app 18.7
+[PASS] section.html app 18.7
+[PASS] experience.html app 18.7
+[PASS] privacy.html app 18.7
+[PASS] news.html app 18.7
+[PASS] archive.html app 18.7
+[PASS] reports.html app 18.7
+[PASS] editorial.html app 18.7
+
+Total: 22 | Passed: 22 | Failed: 0
