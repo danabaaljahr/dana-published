@@ -309,3 +309,15 @@ html[lang="ar"] .series-hero h1{letter-spacing:0;line-height:1.05}
 .editorial-status>a.status-live{display:inline-flex;align-items:center;gap:.25rem;border:1px solid var(--line);border-radius:999px;padding:.48rem .7rem;background:var(--paper);white-space:nowrap;color:var(--ink);font-weight:700;text-decoration:none;transition:transform .15s,background .15s}.editorial-status>a.status-live:hover{transform:translateY(-1px);background:var(--soft)}
 .live-today-status{display:inline-flex;align-items:center;gap:.65rem;margin-top:1.4rem;border:1px solid var(--line);border-radius:999px;padding:.65rem .9rem;font-size:.75rem;color:var(--muted)}.live-today-status i{width:.5rem;height:.5rem;border-radius:50%;background:var(--ink);animation:livePulse 1.8s infinite}.live-today-status b{display:grid;place-items:center;min-width:1.7rem;height:1.7rem;border-radius:999px;background:var(--ink);color:var(--bg);font:600 .7rem "Space Grotesk"}.live-today-hero h1{max-width:11ch}
 @media(max-width:760px){.editorial-status>a.status-live{font-size:.61rem;padding:.4rem .58rem}.live-today-status{font-size:.68rem;max-width:100%;flex-wrap:wrap}}
+
+
+/* V18.8 — language fidelity + unified controls */
+:root{--control-fs:.78rem;--control-h:2.85rem}
+.primary-nav a,.utility,.search-button,.ribbon-link,.ribbon-tools button,.btn,.footer-direct a,.newsletter-row button,.footer-top-button,.policy-links a,.article-tools button{font-size:var(--control-fs)!important}
+.header-actions>button,.utility,.search-button{min-height:var(--control-h)}
+.notify-button{width:var(--control-h)!important;height:var(--control-h)!important;min-width:var(--control-h)!important;min-height:var(--control-h)!important;padding:0!important;white-space:nowrap!important;font-size:.9rem!important;line-height:1!important;overflow:hidden}
+.newsroom-notify{font-size:var(--control-fs)!important;line-height:1.2!important;white-space:nowrap!important;min-height:var(--control-h);padding-inline:1rem!important}
+.translation-loading{min-height:52vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding-block:4rem}.translation-loading h1{font-size:clamp(2rem,4vw,4.2rem);line-height:1.08;margin:.8rem 0}.translation-loading p{color:var(--muted);margin:0;font-size:1rem}
+.legal-nav a{font-size:var(--control-fs)!important}.legal-page h1{font-size:clamp(2.8rem,5.2vw,5.3rem)}.legal-page h2{font-size:1.08rem}.legal-page p{font-size:.96rem}
+html[lang="en"] body{font-family:"Space Grotesk","IBM Plex Sans Arabic",sans-serif}html[lang="en"] .primary-nav a,html[lang="en"] .content-ribbon,html[lang="en"] .header-actions button{font-size:var(--control-fs)!important}
+@media(max-width:760px){:root{--control-fs:.74rem;--control-h:2.65rem}.newsroom-notify{white-space:normal!important}.translation-loading{min-height:45vh;padding-block:2.5rem}.legal-page h1{font-size:2.8rem}}
