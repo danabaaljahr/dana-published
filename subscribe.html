@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f3ee"><meta name="description" content="اشترك في تنبيهات دانه بالجهر البريدية عند نشر مادة جديدة.">
+<title>نبّهني عند النشر | دانه بالجهر</title>
+<link rel="icon" href="assets/brand/favicon.png?v=18.11"><link rel="apple-touch-icon" href="assets/brand/icon-192.png"><link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa+Ink:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=18.11">
+<script defer src="backend.js?v=20260902-v18-11"></script><script defer src="subscribe.js?v=18.11"></script>
+</head>
+<body class="subscription-page">
+<a class="skip-link" href="#main">تجاوز إلى المحتوى</a>
+<header class="site-header"><div class="shell header-row">
+  <a class="brand" href="index.html"><span class="brand-mark"><img src="assets/brand/dana-mark.png?v=18.11" alt="" width="46" height="46"></span><span><strong data-sub="name">دانه بالجهر</strong><small data-sub="portfolio">منصة تحريرية</small></span></a>
+  <nav class="primary-nav legal-nav"><a href="index.html" data-sub="home">الرئيسية</a><a href="archive.html" data-sub="archive">أعمال دانه</a></nav>
+  <div class="header-actions"><button id="subLang" class="utility" type="button">AR <span>/</span> EN</button><button id="subTheme" class="icon-button" type="button" aria-label="المظهر">◐</button></div>
+</div></header>
+<main id="main" class="subscription-main shell">
+  <section class="subscription-intro"><span class="eyebrow">DANA / ALERTS</span><h1 data-sub="title">كل جديد، يوصل لك.</h1><p data-sub="deck">سجلي بريدك مرة واحدة، وبيوصلك تنبيه تلقائي وقت ما تنزل مادة جديدة تناسب اهتماماتك.</p></section>
+  <div class="subscription-grid">
+    <section class="subscription-card subscription-email-card"><span class="eyebrow" data-sub="emailKicker">الخيار المضمون</span><h2 data-sub="emailTitle">التنبيه بالبريد</h2><p data-sub="emailDeck">يشتغل على الجوال والكمبيوتر، وما يحتاج تثبيت ولا إذن من المتصفح.</p>
+      <form class="subscription-form" data-subscribe-form>
+        <label class="subscription-field"><span data-sub="emailLabel">البريد الإلكتروني</span><input type="email" name="email" autocomplete="email" inputmode="email" required placeholder="you@example.com"></label>
+        <fieldset class="subscription-topics"><legend data-sub="topicsTitle">وش يهمك؟</legend>
+          <label><input type="checkbox" name="topic" value="all" checked><span data-sub="all">كل الجديد</span></label>
+          <label><input type="checkbox" name="topic" value="tech"><span data-sub="tech">تقنية</span></label>
+          <label><input type="checkbox" name="topic" value="careers"><span data-sub="careers">سوق العمل</span></label>
+          <label><input type="checkbox" name="topic" value="sports"><span data-sub="sports">رياضة</span></label>
+          <label><input type="checkbox" name="topic" value="arts"><span data-sub="arts">فنون وثقافة</span></label>
+          <label><input type="checkbox" name="topic" value="society"><span data-sub="society">مجتمع</span></label>
+          <label><input type="checkbox" name="topic" value="economy"><span data-sub="economy">اقتصاد</span></label>
+          <label><input type="checkbox" name="topic" value="media"><span data-sub="media">إعلام</span></label>
+          <label><input type="checkbox" name="topic" value="entertainment"><span data-sub="entertainment">ترفيه</span></label>
+        </fieldset>
+        <label class="subscription-consent"><input type="checkbox" name="consent" required><span data-sub="consent">أوافق على استلام تحديثات دانه، وأقدر ألغي الاشتراك بأي وقت.</span></label>
+        <button class="btn primary subscription-submit" type="submit" data-sub="submit">فعّلي التنبيه البريدي</button>
+        <div class="subscription-status" data-subscribe-status role="status" aria-live="polite"></div>
+      </form>
+    </section>
+    <aside class="subscription-side">
+      <section class="subscription-card"><span class="eyebrow" data-sub="pushKicker">اختياري</span><h2 data-sub="pushTitle">تنبيه الجوال</h2><p data-sub="pushDeck">فعّليه كخيار إضافي. على الآيفون لازم تفتحين الموقع من Safari وتضيفينه للشاشة الرئيسية أولًا.</p><button class="btn" id="enablePush" type="button" data-sub="pushButton">فعّلي تنبيه الجوال</button><small id="pushStatus" aria-live="polite"></small></section>
+      <section class="subscription-card subscription-promise"><span class="eyebrow" data-sub="promiseKicker">وش يصلك؟</span><ul><li data-sub="promiseOne">تنبيه عند نشر مادة جديدة فقط.</li><li data-sub="promiseTwo">اختيارات آمنة ومهمة للفئة المستهدفة.</li><li data-sub="promiseThree">بدون رسائل دعائية أو إزعاج.</li></ul></section>
+    </aside>
+  </div>
+</main>
+<footer class="subscription-footer shell"><a href="privacy.html" data-sub="privacy">الخصوصية</a><span>© 2026 <span data-sub="name">دانه بالجهر</span></span></footer>
+</body></html>

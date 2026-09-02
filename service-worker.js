@@ -1,10 +1,10 @@
-/* V18.10 — push-only service worker. No UI caching: readers always get the current site. */
+/* V18.11 — push-only service worker. No UI caching: readers always get the current site. */
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('push',event=>{
   let data={};try{data=event.data?.json()||{}}catch{data={body:event.data?.text()||''}}
   const title=data.title||'دانه بالجهر';
-  const options={body:data.body||'مادة جديدة نُشرت الآن.',icon:data.icon||'./assets/brand/icon-192.png?v=18.10',badge:data.badge||'./assets/brand/favicon.png?v=18.10',tag:data.tag||'dana-new-story',renotify:true,data:{url:data.url||'./'}};
+  const options={body:data.body||'مادة جديدة نُشرت الآن.',icon:data.icon||'./assets/brand/icon-192.png?v=18.11',badge:data.badge||'./assets/brand/favicon.png?v=18.11',tag:data.tag||'dana-new-story',renotify:true,data:{url:data.url||'./'}};
   event.waitUntil(self.registration.showNotification(title,options));
 });
 self.addEventListener('notificationclick',event=>{

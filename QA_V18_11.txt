@@ -1,0 +1,30 @@
+DANA PUBLISHED V18.11 — QA
+Date: 2026-09-02
+
+Implemented
+- Dedicated bilingual email-subscription page: subscribe.html.
+- Every “نبّهني عند النشر / Notify me” control now opens the subscription page.
+- Email is the primary reliable alert path; web push remains an optional secondary path.
+- iPhone guidance is shown before enabling web push.
+- Subscription topics and consent are supported in Arabic and English.
+- Service worker registration is available from the subscription page.
+- Cache-busting bumped to V18.11 for app.js, styles.css, and service-worker.js.
+
+Live backend verification
+- News radar cron: active, every 30 seconds.
+- Auto editor cron: active, every 30 seconds.
+- Newsletter queue: active, every minute.
+- Push queue: active, every minute.
+- Stale processing jobs recover automatically after four minutes.
+- Safe Saudi and globally relevant topic matching expanded for technology, sport, health/science, careers, economy, arts, media, and entertainment.
+- Automated safety lock blocks attacks, accusations, defamation, controversy, crime, legal cases, violence, war, rumors, and sensitive reputational risk.
+- Five previously missed safe stories were published automatically during the live test.
+- All five were published with complete Arabic and English versions before going live.
+- All five recorded newsletter_status=sent and push_status=sent.
+- The alternate test newsletter subscriber is active; welcome_sent_at and last_sent_at are present; last_error is empty.
+
+Static checks
+- app.js: syntax OK.
+- backend.js: syntax OK.
+- subscribe.js: syntax OK.
+- service-worker.js: syntax OK.
