@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const URL = 'https://vffsndkoaswcnnlzpvuu.supabase.co';
-  const KEY = 'sb_publishable_VdtvaVY0ph621QwYpFnjpw_8ukceobx';
+  const URL = 'https://xydocbujrhcunpftaeyj.supabase.co';
+  const KEY = 'sb_publishable_SKOvT9h5n4v1S_QwqUq4Bw_s2nOW7DD';
   const OWNER = 'danahfahad.mb@gmail.com';
   const sb = window.supabase.createClient(URL, KEY, {auth:{persistSession:true,detectSessionInUrl:true}});
   const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -23,21 +23,23 @@
   function excerptFrom(body){return String(body||'').replace(/\s+/g,' ').trim().slice(0,190)}
   function saudiDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
   async function publicRest(table,params){const r=await fetch(`${URL}/rest/v1/${table}?${params}`,{cache:'no-store',headers:{apikey:KEY,'Cache-Control':'no-cache'}});if(!r.ok){const detail=await r.text().catch(()=>''),err=new Error(`Public check ${r.status}${detail?` — ${detail.slice(0,120)}`:''}`);err.status=r.status;throw err}return r.json()}
-  async function verifyPublicArticle(slug){const rows=await publicRest('cms_articles',`slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=slug,status,image_url&limit=1`);if(!rows?.[0])throw new Error('المادة محفوظة، لكن فحص وصول القراء لم ينجح');return rows[0]}
+  async function verifyPublicArticle(slug){const r=await fetch(URL+'/functions/v1/public-feed?format=article&slug='+encodeURIComponent(slug),{cache:'no-store'});if(!r.ok)throw new Error('المادة محفوظة، لكن فحص وصول القراء لم ينجح');return r.json();}
   async function verifyPublicSeries(slug){const rows=await publicRest('cms_series',`slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=slug,status,cover_url&limit=1`);if(!rows?.[0])throw new Error('السلسلة محفوظة، لكن فحص وصول القراء لم ينجح');return rows[0]}
   async function isAdmin(){const {data}=await sb.from('admin_users').select('user_id').maybeSingle();return !!data}
-  async function ensureOwner(){const {data:{user}}=await sb.auth.getUser();if(!user)return false;if((user.email||'').toLowerCase()!==OWNER){await sb.auth.signOut();throw new Error('هذا البريد غير مصرح له بالدخول.')}if(await isAdmin())return true;const {error}=await sb.rpc('claim_owner');if(error)throw error;return true}
+  async function ensureOwner(){const {data:{user}}=await sb.auth.getUser();if(!user)throw new Error('سجّلي الدخول مرة أخرى.');if((user.email||'').toLowerCase()!==OWNER){await sb.auth.signOut();throw new Error('هذا البريد غير مصرح له بالدخول.')}if(await isAdmin())return true;const {error}=await sb.rpc('claim_owner');if(error)throw error;return true}
 
   async function init(){
     $('#todayLabel').textContent=new Intl.DateTimeFormat('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(new Date());
+    const hash=new URLSearchParams(location.hash.slice(1)),tokenHash=hash.get('token_hash');
+    if(tokenHash){history.replaceState(null,'',location.pathname+location.search);const {error}=await sb.auth.verifyOtp({token_hash:tokenHash,type:'email'});if(error)showLogin('انتهت صلاحية الرابط. اطلبي رابط دخول جديد.');}
     const {data:{session}}=await sb.auth.getSession();
     if(session){try{await enterStudioOnce()}catch(e){showLogin(e.message)}} else showLogin();
-    sb.auth.onAuthStateChange(async(event,session)=>{if(session&&['SIGNED_IN','INITIAL_SESSION'].includes(event)&&!studioReady){try{await enterStudioOnce()}catch(e){showLogin(e.message)}}});
+    sb.auth.onAuthStateChange((event,session)=>{if(session&&['SIGNED_IN','INITIAL_SESSION'].includes(event)&&!studioReady)setTimeout(()=>enterStudioOnce().catch(e=>showLogin(e.message)),0)});
     bindStatic();
   }
   function showLogin(msg=''){login.hidden=false;app.hidden=true;if(msg)$('#loginStatus').textContent=msg}
   async function enterStudioOnce(){if(studioReady)return;if(enteringStudio)return enteringStudio;enteringStudio=enterStudio().finally(()=>enteringStudio=null);return enteringStudio}
-  async function enterStudio(){await ensureOwner();login.hidden=true;app.hidden=false;content.innerHTML='<div class="studio-loading"><span></span><strong>جارٍ تجهيز مساحة دانه…</strong><small>نراجع الأرشيف والمواد المنشورة.</small></div>';await Promise.all([loadLocalArticles(),loadLocalSeries(),loadLocalSections(),loadSources(),loadRadar()]);try{await bootstrapBundledArchive()}catch(e){console.warn('Archive bootstrap:',e);toast('تعذر التحقق من تهيئة الأرشيف.')}await Promise.all([loadLocalArticles(),loadLocalSeries(),loadLocalSections(),loadSources(),loadRadar()]);studioReady=true;setupRadarRealtime();render('dashboard')}
+  async function enterStudio(){await ensureOwner();login.hidden=true;app.hidden=false;content.innerHTML='<div class="studio-loading"><span></span><strong>جارٍ تجهيز مساحة دانه…</strong><small>نراجع الأرشيف والمواد المنشورة.</small></div>';await Promise.all([loadLocalArticles(),loadLocalSeries(),loadLocalSections(),loadSources(),loadRadar()]);studioReady=true;setupRadarRealtime();render('dashboard')}
   async function bootstrapBundledArchive(){
     const {data:boot,error:bootError}=await sb.from('cms_settings').select('value').eq('key','archive_bootstrapped').maybeSingle();
     if(bootError)throw bootError;if(boot?.value===true)return;
@@ -71,8 +73,8 @@
     $('#refreshData').addEventListener('click',async()=>{await Promise.all([loadLocalArticles(),loadLocalSeries(),loadLocalSections(),loadSources(),loadRadar()]);render(currentView);toast('تم تحديث البيانات')});
     $('#mobileNav').addEventListener('click',()=>$('.studio-sidebar').classList.toggle('open'));
   }
-  async function sendLink(){const btn=$('#sendMagicLink');btn.disabled=true;$('#loginStatus').textContent='جارٍ إرسال رابط الدخول…';const redirectTo=location.origin+location.pathname;const {error}=await sb.auth.signInWithOtp({email:OWNER,options:{emailRedirectTo:redirectTo,shouldCreateUser:true}});btn.disabled=false;if(error){$('#loginStatus').textContent=`تعذر الإرسال: ${error.message}`;return}$('#loginStatus').textContent='تم الإرسال. افتحي الرابط الذي وصل إلى بريدك ثم ستدخلين اللوحة مباشرة.'}
-  async function loadLocalArticles(){const {data,error}=await sb.from('cms_articles').select('*').order('updated_at',{ascending:false});if(error)throw error;const translations=window.ARTICLE_TRANSLATIONS_EN||{}, bundledBySlug=new Map(bundledArticles.map(a=>[a.slug,a]));localArticles=(data||[]).map(row=>{const bundled=bundledBySlug.get(row.slug), en=bundled?.en||translations[row.slug]||null, dbHasEn=!!String(row.body_en||'').trim();if(!dbHasEn&&en?.body?.length){return {...row,__db_has_en:false,title_en:row.title_en||en.title||null,excerpt_en:row.excerpt_en||en.excerpt||null,body_en:en.body.join('\n\n'),place_en:row.place_en||en.place||'Jeddah',tags_en:(row.tags_en?.length?row.tags_en:(en.tags||[])),show_en:true}}return {...row,__db_has_en:dbHasEn}})}
+  async function sendLink(){const btn=$('#sendMagicLink');btn.disabled=true;$('#loginStatus').textContent='جارٍ إرسال رابط الدخول…';try{const r=await fetch(URL+'/functions/v1/email-hub',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'owner_login'}),signal:AbortSignal.timeout(30000)});const data=await r.json();if(!r.ok)throw new Error(data.error||'تعذر الإرسال');$('#loginStatus').textContent='تم الإرسال. افتحي أحدث رابط وصل إلى بريدك للدخول.';}catch(e){$('#loginStatus').textContent=e.message||'تعذر الإرسال';}finally{btn.disabled=false;}}
+  async function loadLocalArticles(){const data=[];for(let offset=0;offset<100000;offset+=500){const {data:batch,error}=await sb.from('cms_articles').select('*').order('updated_at',{ascending:false}).order('id').range(offset,offset+499);if(error)throw error;data.push(...(batch||[]));if(!batch||batch.length<500)break;}const translations=window.ARTICLE_TRANSLATIONS_EN||{}, bundledBySlug=new Map(bundledArticles.map(a=>[a.slug,a]));localArticles=(data||[]).map(row=>{const bundled=bundledBySlug.get(row.slug), en=bundled?.en||translations[row.slug]||null, dbHasEn=!!String(row.body_en||'').trim();if(!dbHasEn&&en?.body?.length){return {...row,__db_has_en:false,title_en:row.title_en||en.title||null,excerpt_en:row.excerpt_en||en.excerpt||null,body_en:en.body.join('\n\n'),place_en:row.place_en||en.place||'Jeddah',tags_en:(row.tags_en?.length?row.tags_en:(en.tags||[])),show_en:true}}return {...row,__db_has_en:dbHasEn}})}
   async function loadLocalSeries(){const {data,error}=await sb.from('cms_series').select('*').order('featured',{ascending:false}).order('created_at',{ascending:true});if(error)throw error;localSeries=data||[]}
   async function loadLocalSections(){const {data,error}=await sb.from('cms_sections').select('*').order('sort_order',{ascending:true}).order('title',{ascending:true});if(error)throw error;localSections=data||[]}
   async function loadSources(){const {data,error}=await sb.from('news_sources').select('*').order('active',{ascending:false}).order('name',{ascending:true});if(error)throw error;localSources=data||[]}
