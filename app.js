@@ -9,14 +9,19 @@ const QR_ENDPOINT='https://vffsndkoaswcnnlzpvuu.supabase.co/functions/v1/qr-code
 let articles=(window.ARTICLES||[]).map(a=>({...a,en:EN[a.slug]||a.en||null,showEnglish:!!(EN[a.slug]||a.en)}));
 let series=(window.BUNDLED_SERIES||[]).map(x=>({...x}));
 let sections=[
-{id:'society',slug:'society',title:'مجتمع',title_en:'Society',description:'قرارات وقصص وتحولات تمس الحياة اليومية.',description_en:'Decisions, stories and shifts that shape everyday life.',visible:true,sortOrder:10},
-{id:'tech',slug:'tech',title:'تقنية',title_en:'Technology',description:'تقنية وذكاء اصطناعي ومنصات تغيّر طريقة العيش والعمل.',description_en:'Technology, AI and platforms changing how we live and work.',visible:true,sortOrder:20},
-{id:'careers',slug:'careers',title:'سوق العمل',title_en:'Careers',description:'وظائف وتدريب وتعليم وفرص تمس بداية المسار المهني.',description_en:'Jobs, training, education and early-career opportunities.',visible:true,sortOrder:30},
-{id:'sports',slug:'sports',title:'رياضة',title_en:'Sports',description:'أحداث ونتائج رياضية تستحق المتابعة.',description_en:'Sports events and results worth following.',visible:true,sortOrder:40},
-{id:'arts',slug:'arts',title:'فنون وثقافة',title_en:'Arts & Culture',description:'الفن والثقافة والمشهد الإبداعي.',description_en:'Art, culture and the creative scene.',visible:true,sortOrder:50},
-{id:'entertainment',slug:'entertainment',title:'ترفيه',title_en:'Entertainment',description:'فعاليات واتجاهات ترفيهية قريبة من جيل اليوم.',description_en:'Events and entertainment trends close to today’s generation.',visible:true,sortOrder:60},
-{id:'economy',slug:'economy',title:'اقتصاد',title_en:'Economy',description:'أسعار وأسواق وقرارات لها أثر مباشر.',description_en:'Prices, markets and decisions with direct impact.',visible:true,sortOrder:70},
-{id:'media',slug:'media',title:'إعلام',title_en:'Media',description:'صحافة ومنصات وممارسات تشكّل ما نراه.',description_en:'Journalism and platforms shaping what we see.',visible:true,sortOrder:80}
+{id:'eb690bd4-07e1-41b0-8bd2-34984de0d7af',slug:'society',title:'مجتمع',title_en:'Society',description:'قرارات وقصص وتحولات تمس الحياة اليومية.',description_en:'Decisions, stories and shifts that shape everyday life.',visible:true,sortOrder:10},
+{id:'9703bbae-9ee5-4510-939d-53cfeace5d33',slug:'health',title:'صحة',title_en:'Health',description:'أخبار الصحة والوقاية وجودة الحياة.',description_en:'Health, prevention and quality-of-life news.',visible:true,sortOrder:20},
+{id:'9b3a8fa5-b6f5-4227-a653-1aaea6829297',slug:'education',title:'تعليم',title_en:'Education',description:'التعليم والتدريب والفرص المعرفية.',description_en:'Education, training and learning opportunities.',visible:true,sortOrder:30},
+{id:'57b55ea9-b99f-4351-836d-800e2c42d1f4',slug:'ai',title:'ذكاء اصطناعي',title_en:'AI',description:'أخبار الذكاء الاصطناعي وتطبيقاته وتأثيره.',description_en:'Artificial intelligence, its applications and impact.',visible:true,sortOrder:40},
+{id:'a3fd9af6-026c-49fb-bd9e-3e89edaaf9ed',slug:'tech',title:'تقنية',title_en:'Technology',description:'تقنية ومنصات تغيّر طريقة العيش والعمل.',description_en:'Technology and platforms changing how we live and work.',visible:true,sortOrder:50},
+{id:'2f561789-4254-422c-b27c-48e953306293',slug:'science',title:'علوم وبيئة',title_en:'Science & Environment',description:'العلوم والبيئة والاكتشافات التي تهم القارئ.',description_en:'Science, environment and discoveries that matter.',visible:true,sortOrder:60},
+{id:'2aade8df-1233-45d9-afcc-81fb92e49301',slug:'careers',title:'سوق العمل',title_en:'Careers',description:'وظائف وتدريب وفرص تمس بداية المسار المهني.',description_en:'Jobs, training and early-career opportunities.',visible:true,sortOrder:70},
+{id:'72cc3ed5-ffb6-4def-9282-4ae3bc40b4c3',slug:'economy',title:'اقتصاد',title_en:'Economy',description:'أسعار وأسواق وقرارات لها أثر مباشر.',description_en:'Prices, markets and decisions with direct impact.',visible:true,sortOrder:80},
+{id:'58530d38-a4f7-42ba-9159-0d2ed97866e2',slug:'sports',title:'رياضة',title_en:'Sports',description:'أحداث ونتائج رياضية تستحق المتابعة.',description_en:'Sports events and results worth following.',visible:true,sortOrder:90},
+{id:'9ce340a8-3919-4f59-b773-1d4e3b789a59',slug:'travel',title:'سياحة وسفر',title_en:'Travel & Tourism',description:'وجهات وتجارب وأخبار السياحة والسفر.',description_en:'Destinations, experiences and travel news.',visible:true,sortOrder:100},
+{id:'a1aa94ea-7fad-46e9-b106-502848d13ced',slug:'arts',title:'فنون وثقافة',title_en:'Arts & Culture',description:'الفن والثقافة والمشهد الإبداعي.',description_en:'Art, culture and the creative scene.',visible:true,sortOrder:110},
+{id:'85918e56-46e8-44c3-83dc-cd018f586dc1',slug:'entertainment',title:'ترفيه',title_en:'Entertainment',description:'فعاليات واتجاهات ترفيهية قريبة من جيل اليوم.',description_en:'Events and entertainment trends close to today’s generation.',visible:true,sortOrder:120},
+{id:'fca9594a-5d44-41c7-921e-027eefee8584',slug:'media',title:'إعلام',title_en:'Media',description:'صحافة ومنصات وممارسات تشكّل ما نراه.',description_en:'Journalism and platforms shaping what we see.',visible:true,sortOrder:130}
 ];
 const main=$('#main'), ribbon=$('#ribbonTrack'), readingDock=$('#readingDock');
 const page=document.body.dataset.page||'home', pageCategory=document.body.dataset.category||'';
