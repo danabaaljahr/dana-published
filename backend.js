@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const PROJECT_URL = 'https://vffsndkoaswcnnlzpvuu.supabase.co';
-  const PUBLISHABLE_KEY = 'sb_publishable_VdtvaVY0ph621QwYpFnjpw_8ukceobx';
+  const PROJECT_URL = 'https://xydocbujrhcunpftaeyj.supabase.co';
+  const PUBLISHABLE_KEY = 'sb_publishable_SKOvT9h5n4v1S_QwqUq4Bw_s2nOW7DD';
   const API = `${PROJECT_URL}/rest/v1`;
   const headers = {apikey: PUBLISHABLE_KEY};
   const fallback = {
@@ -41,12 +41,15 @@
   function normalizeSection(row){
     return {id:row.id,slug:row.slug,title:row.title,title_en:row.title_en||'',description:row.description||'',description_en:row.description_en||'',visible:row.visible!==false,sortOrder:Number(row.sort_order)||100};
   }
+  const requestCache=new Map();
   async function request(path, options={}){
+    const cached=requestCache.get(path);
+    if(!options.method&&cached&&Date.now()-cached.at<300000)return cached.data;
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
     try{
       const r=await fetch(API+path,{...options,cache:'no-store',signal:controller.signal,headers:{...headers,'Cache-Control':'no-cache',...((options&&options.headers)||{})}});
       if(!r.ok)throw new Error(`Backend ${r.status}`);
-      const text=await r.text(); return text?JSON.parse(text):null;
+      const text=await r.text(),data=text?JSON.parse(text):null;if(!options.method)requestCache.set(path,{at:Date.now(),data});return data;
     }finally{clearTimeout(timer)}
   }
   async function loadPublishedSeries(){
@@ -55,8 +58,44 @@
   async function loadPublishedSections(){
     try{const rows=await request('/cms_sections?visible=eq.true&select=*&order=sort_order.asc,title.asc');return (rows||[]).map(normalizeSection)}catch(e){console.error('Sections CMS unavailable.',e);return null}
   }
+  const readerCacheKey='dana-reader-v2-delta-1';
+  let readerCache={at:0,cursor:'2026-10-06T00:00:00Z',items:[],slugs:null},readerPending=null;
+  try{const c=JSON.parse(localStorage.getItem(readerCacheKey)||'null');if(c&&Array.isArray(c.items)&&Array.isArray(c.slugs)&&Number.isFinite(Date.parse(c.cursor)))readerCache=c;}catch{}
+  function readerArticles(c){
+    const map=new Map((window.ARTICLES||[]).map(a=>[a.slug,a]));
+    c.items.forEach(a=>map.set(a.slug,a));
+    const allowed=c.slugs?new Set(c.slugs):null;
+    return [...map.values()].filter(a=>!allowed||allowed.has(a.slug)).sort((a,b)=>String(b.publishedAt||b.date||'').localeCompare(String(a.publishedAt||a.date||'')));
+  }
   async function loadPublishedArticles(){
-    try{const rows=await request('/cms_articles?status=eq.published&select=*&order=published_at.desc.nullslast,published_date.desc');return (rows||[]).map(normalize)}catch(e){console.error('Article CMS unavailable.',e);return null}
+    if(readerCache.at&&Date.now()-readerCache.at<300000)return readerArticles(readerCache);
+    if(readerPending)return readerPending;
+    readerPending=(async()=>{
+      try{
+        const since=new Date(Math.max(Date.parse('2026-10-06T00:00:00Z'),Date.parse(readerCache.cursor)-60000)).toISOString();
+        const map=new Map(readerCache.items.map(a=>[a.slug,a]));
+        let offset=0,until='',slugs=null;
+        while(true){
+          const q=new URLSearchParams({format:'reader',since,offset:String(offset)});
+          if(until)q.set('until',until);
+          const response=await fetch(PROJECT_URL+'/functions/v1/public-feed?'+q,{signal:AbortSignal.timeout(20000)});
+          if(!response.ok)throw new Error('Reader '+response.status);
+          const data=await response.json();
+          if(!Array.isArray(data.rows)||!data.until)throw new Error('Invalid reader response');
+          if(offset===0){if(!Array.isArray(data.slugs))throw new Error('Invalid archive manifest');slugs=data.slugs;until=data.until;}
+          data.rows.map(normalize).forEach(a=>map.set(a.slug,a));
+          if(!data.more)break;
+          offset+=200;
+          if(offset>100000)throw new Error('Reader pagination limit');
+        }
+        const allowed=new Set(slugs);
+        readerCache={at:Date.now(),cursor:until,slugs,items:[...map.values()].filter(a=>allowed.has(a.slug))};
+        try{localStorage.setItem(readerCacheKey,JSON.stringify(readerCache));}catch{}
+        return readerArticles(readerCache);
+      }catch(e){console.error('Article CMS unavailable.',e);return readerCache.slugs?readerArticles(readerCache):null;}
+      finally{readerPending=null;}
+    })();
+    return readerPending;
   }
   async function edge(action, body={}){
     const r=await fetch(`${PROJECT_URL}/functions/v1/${action}`,{method:'POST',cache:'no-store',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(body)});
